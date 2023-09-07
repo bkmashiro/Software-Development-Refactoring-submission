@@ -69,3 +69,8 @@ export function md5(data: string): string {
 
   return toHexString(a) + toHexString(b) + toHexString(c) + toHexString(d);
 }
+
+export function expect<T>(exp: (args: any) => T, tobe: T) : boolean {
+  throw new Error('Not implemented')
+}
+

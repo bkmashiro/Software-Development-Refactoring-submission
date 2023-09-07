@@ -1,4 +1,4 @@
-enum TransactionType {
+export enum TransactionType {
   /**
    * the bookstore buy a book from a supplier
    */

@@ -1,9 +1,11 @@
 import { Tire } from './dataStructure/tire';
 import { Book } from "./entities/book";
-import { User } from "./entities/user";
-import { Transaction } from './entities/transaction';
+import { User, UserLevel, UserRole } from "./entities/user";
+import { Transaction, TransactionType } from './entities/transaction';
 import { promises as fs } from 'fs'
 import { md5 } from './utils';
+import { LogLevel, log } from './log';
+import { discount, level } from './config';
 
 const books: Map<number, Book> = new Map() // this will be serialized
 const users: Map<number, User> = new Map() // this will be serialized
@@ -12,17 +14,29 @@ const records: Map<number, Transaction> = new Map() // this will be serialized
 const bookTire = Tire.createTrieNode<Book>()
 const userTire = Tire.createTrieNode<User>()
 
+type createUserDto = Omit<User, 'created_at' | 'id' | 'updated_at' | 'password' | 'level' | 'role' | 'tot_expenditure' | 'balance'> & { rawPassword: string }
+
 // USER
-export function addUser(user: Omit<User, 'created_at' | 'id' | 'updated_at' | 'password'> & { rawPassword: string }) {
+export function addUser(user: createUserDto) {
+  if (getUserByName(user.name)) {
+    log(LogLevel.ERROR, `user ${user.name} already exists`)
+    return
+  }
+
   const id = users.size
   const now = new Date()
-  const newUser: User = {
+  const newUser: User & { rawPassword: any } = {
     ...user,
     password: md5(user.rawPassword),
     id,
+    tot_expenditure: 0,
+    balance: 0,
+    level: UserLevel.NORMAL,
+    role: UserRole.USER,
     created_at: now,
     updated_at: now
   }
+  delete newUser.rawPassword
   users.set(newUser.id, newUser)
   Tire.insert<User>(userTire, newUser.name, newUser)
 }
@@ -55,6 +69,10 @@ export function getUserById(id: number): User | undefined {
 
 // BOOK
 export function addBook(book: Omit<Book, 'id'>) {
+  if (getBookByTitle(book.title)) {
+    log(LogLevel.ERROR, `book ${book.title} already exists`)
+    return
+  }
   const id = books.size
   const newBook: Book = {
     ...book,
@@ -100,6 +118,7 @@ export function addRecord(record: Omit<Transaction, 'id' | 'created_at'>) {
     created_at: now
   }
   records.set(id, newRecord)
+  log(LogLevel.INFO, `user ${getUserById(newRecord.user_id)?.name} ${newRecord.type === TransactionType.SELL ? 'bought' : 'sold'} ${newRecord.quantity} <${getBookById(newRecord.book_id)?.title}>`)
 }
 
 export function getRecordById(id: number): Transaction | undefined {
@@ -126,6 +145,38 @@ export function removeRecord(id: number) {
   }
   return false
 }
+
+function updateUser(user: User) {
+  const newLevel = Object.entries(level).filter(([_, value]) => user.tot_expenditure >= value).sort((a, b) => b[1] - a[1]).at(0)?.[0] as UserLevel 
+  if (newLevel && newLevel !== user.level) {
+    log(LogLevel.INFO, `user ${user.name} level up to ${newLevel}`)
+    user.level = newLevel
+  }
+}
+
+export function makeTransaction(user: User, book: Book, quantity: number) {
+  const { level } = user
+  const discountRate = discount[level]
+  const price_tot = book.price * quantity * discountRate
+  const newBalance = user.balance - price_tot
+  if (newBalance < 0) {
+    log(LogLevel.ERROR, `user ${user.name} has insufficient balance`)
+    return false
+  }
+  user.balance = newBalance
+  user.tot_expenditure += price_tot
+  log(LogLevel.INFO, `user ${user.name} balance decreased by ${price_tot}`)
+  addRecord({
+    user_id: user.id,
+    book_id: book.id,
+    quantity,
+    price_tot,
+    type: TransactionType.SELL
+  })
+
+  updateUser(user)
+}
+
 
 
 
@@ -158,10 +209,24 @@ function deserialize(data: string): boolean {
   }
 }
 
-export async function dump(filename: string) {
-  await fs.writeFile(filename, serialize())
+export async function dump(filename: string = './data/main.json') {
+  try {
+    await fs.writeFile(filename, serialize())
+    log(LogLevel.INFO, `successfully dump to ${filename}, ${books.size} books, ${users.size} users, ${records.size} records`)
+  } catch {
+    log(LogLevel.ERROR, 'dump failed')
+  }
 }
 
-export async function load(filename: string) {
-  deserialize(await fs.readFile(filename, 'utf-8'))
+export async function load(filename: string = './data/main.json') {
+  try {
+    const data = await fs.readFile(filename, 'utf-8')
+    if (deserialize(data)) {
+      log(LogLevel.INFO, `successfully load from ${filename}, ${books.size} books, ${users.size} users, ${records.size} records`)
+    } else {
+      log(LogLevel.ERROR, 'load failed')
+    }
+  } catch {
+    log(LogLevel.ERROR, 'load failed')
+  }
 }

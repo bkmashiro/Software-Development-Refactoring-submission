@@ -18,3 +18,9 @@ Members can log in to the system to browse, query, purchase, borrow, and return 
 The shop assistant can perform operations such as querying and counting books, listing and removing books, and modifying books.
 
 The shop assistant can conduct relevant statistical work on orders and sales.
+
+## How to run
+
+execute `ts-node test.ts` to run test.
+
+if you use tsc, compile it into js file and run it.
