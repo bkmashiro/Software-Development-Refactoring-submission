@@ -1,5 +1,5 @@
 import { prompt } from 'enquirer';
-import { addBook, addUser, dump, getBookByTitle, getRecordById, getUserByName, removeBook, removeUser } from '../repository';
+import { addBook, addUser, dump, getAllBookNames, getAllUserNames, getBookByTitle, getRecordById, getUserByName, removeBook, removeUser } from '../repository';
 import { FailMessage, SuccessMessage, md5 } from '../utils';
 import chalk from 'chalk';
 const { Form, Confirm, NumberPrompt } = require('enquirer');
@@ -17,19 +17,22 @@ export async function managementIndex() {
     ],
   }
 
-  const act = await prompt(promptOptions) as { action: string }
-  switch (act.action) {
-    case 'User Management':
-      await UserManagement()
-      break;
-    case 'Book Management':
-      await BookManagement()
-      break;
-    case 'Transaction Management':
-      await TransactionManagement()
-      break;
-    case 'Back':
-      break;
+  let act = { action: '' }
+  while (act.action !== 'Back') {
+    act = await prompt(promptOptions) as { action: string }
+    switch (act.action) {
+      case 'User Management':
+        await UserManagement()
+        break;
+      case 'Book Management':
+        await BookManagement()
+        break;
+      case 'Transaction Management':
+        await TransactionManagement()
+        break;
+      case 'Back':
+        break;
+    }
   }
 }
 
@@ -43,6 +46,7 @@ async function UserManagement() {
       { name: 'Delete User', message: 'Delete User' },
       { name: 'Update User', message: 'Update User' },
       { name: 'Query User', message: 'Query User' },
+      { name: 'All User', message: 'All User' },
       { name: 'Back', message: 'Back' },
     ],
   }
@@ -52,23 +56,26 @@ async function UserManagement() {
     switch (act.action) {
       case 'Add User':
         await AddUser();
-        break;
+        break
       case 'Delete User':
         await DeleteUser()
-        break;
+        break
       case 'Update User':
         await UpdateUser()
-        break;
+        break
       case 'Query User':
         await QueryUser()
-        break;
+        break
+      case 'All User':
+        await AllUser()
+        break
       case 'Back':
         break;
     }
   }
 }
 
-async function AddUser() {
+export async function AddUser() {
   const prompt = new Form({
     name: 'user',
     message: 'Please provide the following user information:',
@@ -83,7 +90,7 @@ async function AddUser() {
     rawPassword: ans.password,
   })) {
     console.log('Add User Success');
-    dump()
+    await dump()
   } else {
     console.log('User exists');
   }
@@ -116,7 +123,7 @@ async function DeleteUser() {
   if (confirm) {
     if (removeUser(user.id)) {
       console.log(`User ${ans.username} deleted`);
-      dump()
+      await dump()
     } else {
       FailMessage(`User ${ans.username} delete failed`)
     }
@@ -163,7 +170,7 @@ async function UpdateUser() {
     FailMessage(`Invalid role ${modifyAns.role}`)
   }
 
-  dump()
+  await dump()
 
   SuccessMessage(`User ${user.name} updated`)
 }
@@ -190,6 +197,13 @@ async function QueryUser() {
   }
 }
 
+async function AllUser() {
+  const usernames = getAllUserNames()
+  for (const username of usernames) {
+    console.log(`${chalk.green(username)}`)
+  }
+}
+
 async function BookManagement() {
   const promptOptions = {
     type: 'select',
@@ -200,6 +214,7 @@ async function BookManagement() {
       { name: 'Delete Book', message: 'Delete Book' },
       { name: 'Update Book', message: 'Update Book' },
       { name: 'Query Book', message: 'Query Book' },
+      { name: 'All Book', message: 'All Book'},
       { name: 'Back', message: 'Back' },
     ],
   }
@@ -218,6 +233,9 @@ async function BookManagement() {
         break;
       case 'Query Book':
         await QueryBook()
+        break;
+      case 'All Book':
+        await AllBook()
         break;
       case 'Back':
         break;
@@ -249,7 +267,7 @@ async function AddBook() {
   });
   if (addBookResult) {
     SuccessMessage('Add Book Success')
-    dump()
+    await dump()
   } else {
     FailMessage('Add Book Failed')
   }
@@ -273,7 +291,7 @@ async function DeleteBook() {
   const deleteBookResult = removeBook(book.id)
   if (deleteBookResult) {
     SuccessMessage(`Book ${ans.name} deleted`)
-    dump()
+    await dump()
   } else {
     FailMessage(`Book ${ans.name} delete failed`)
   }
@@ -316,7 +334,7 @@ async function UpdateBook() {
   book.price = Number(modifyAns.price)
   book.quantity = Number(modifyAns.quantity)
 
-  dump()
+  await dump()
 
   SuccessMessage(`Book ${book.title} updated`)
 
@@ -345,6 +363,13 @@ async function QueryBook() {
   }
 }
 
+async function AllBook() {
+  const books = getAllBookNames()
+  for (const book of books) {
+    console.log(`${chalk.green(book)}`)
+  }
+}
+
 async function TransactionManagement() {
   const promptOptions = {
     type: 'select',
@@ -355,7 +380,7 @@ async function TransactionManagement() {
       { name: 'Back', message: 'Back' },
     ],
   }
-  
+
   let act = { action: '' }
 
   while (act.action !== 'Back') {

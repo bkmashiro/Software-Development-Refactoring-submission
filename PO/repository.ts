@@ -60,6 +60,10 @@ export function getUserById(id: number): User | null {
   return users.get(id) ?? null
 }
 
+export function getAllUserNames(): string[] {
+  return Array.from(users.values()).map(user => user.name)
+}
+
 // BOOK
 export function addBook(book: Omit<Book, 'id'>) {
   if (getBookByTitle(book.title)) {
@@ -92,6 +96,10 @@ export function getBookById(id: number): Book | null {
 
 export function getBookByTitle(title: string): Book | null {
   return Tire.search<Book>(bookTire, title)
+}
+
+export function getAllBookNames(): string[] {
+  return Array.from(books.values()).map(book => book.title)
 }
 
 //RECORD
