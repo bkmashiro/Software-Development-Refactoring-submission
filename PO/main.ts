@@ -5,6 +5,7 @@ import { displayWelcome } from "./tui/welcome.ui";
 import { prompt } from 'enquirer';
 import { User } from './entities/user';
 import { FailMessage } from "./utils";
+import { about } from "./tui/about.ui";
 
 let loginResult : {
   user?: User
@@ -66,7 +67,7 @@ async function main() {
         console.log('Help');
         break;
       case 'About':
-        console.log('About');
+        about()
         break;
     }
   }

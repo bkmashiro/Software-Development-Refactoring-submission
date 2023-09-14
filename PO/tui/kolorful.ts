@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import path from 'path';
 
 function rgbToAnsi(r: number, g: number, b: number) {
   if (r === g && g === b) {
@@ -23,7 +24,7 @@ function printColor(r: number, g: number, b: number) {
 }
 
 // load json
-const json = JSON.parse(fs.readFileSync('output_sanyue.json', 'utf8')) as {
+const json = JSON.parse(fs.readFileSync(path.join(__dirname, './output_sanyue.json'), 'utf8')) as {
   width: number;
   height: number;
   pixels: number[][];
@@ -32,7 +33,7 @@ const json = JSON.parse(fs.readFileSync('output_sanyue.json', 'utf8')) as {
 /**
  * we purposely use Chinese function name
  */
-export function 三月七() {
+export function 三月七(...args: any[]) {
   // this is hard cutting, may cause inconsistency
   // set this to 2, 3 ... to make the image smaller( skip some pixels )
   const zoom_factor = 1
