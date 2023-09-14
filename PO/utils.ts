@@ -1,3 +1,5 @@
+import chalk from "chalk";
+
 export function md5(data: string): string {
   const rotateLeft = (value: number, shift: number) => {
     return (value << shift) | (value >>> (32 - shift));
@@ -74,3 +76,18 @@ export function expect<T>(exp: (args: any) => T, tobe: T) : boolean {
   throw new Error('Not implemented')
 }
 
+export function clearScreen() {
+  // for windows
+  console.clear()
+
+  // for unix-like systems
+  console.log('\x1Bc');
+}
+
+export function FailMessage(msg: string) {
+  console.log(chalk.red(msg))
+}
+
+export function SuccessMessage(msg: string) {
+  console.log(chalk.green(msg))
+}

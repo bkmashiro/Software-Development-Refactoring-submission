@@ -20,7 +20,7 @@ type createUserDto = Omit<User, 'created_at' | 'id' | 'updated_at' | 'password' 
 export function addUser(user: createUserDto) {
   if (getUserByName(user.name)) {
     log(LogLevel.ERROR, `user ${user.name} already exists`)
-    return
+    return false
   }
 
   const id = users.size
@@ -39,6 +39,7 @@ export function addUser(user: createUserDto) {
   delete newUser.rawPassword
   users.set(newUser.id, newUser)
   Tire.insert<User>(userTire, newUser.name, newUser)
+  return true
 }
 
 export function removeUser(id: number) {
@@ -51,27 +52,19 @@ export function removeUser(id: number) {
   return false
 }
 
-export function getUserByName(name: string): User | undefined {
-  const user = Tire.search<User>(userTire, name)
-  if (user) {
-    return user
-  }
-  return undefined
+export function getUserByName(name: string): User | null {
+  return Tire.search<User>(userTire, name)
 }
 
-export function getUserById(id: number): User | undefined {
-  const user = users.get(id)
-  if (user) {
-    return user
-  }
-  return undefined
+export function getUserById(id: number): User | null {
+  return users.get(id) ?? null
 }
 
 // BOOK
 export function addBook(book: Omit<Book, 'id'>) {
   if (getBookByTitle(book.title)) {
     log(LogLevel.ERROR, `book ${book.title} already exists`)
-    return
+    return false
   }
   const id = books.size
   const newBook: Book = {
@@ -80,6 +73,7 @@ export function addBook(book: Omit<Book, 'id'>) {
   }
   books.set(id, newBook)
   Tire.insert<Book>(bookTire, newBook.title, newBook)
+  return true
 }
 
 export function removeBook(id: number) {
@@ -92,20 +86,12 @@ export function removeBook(id: number) {
   return false
 }
 
-export function getBookById(id: number): Book | undefined {
-  const book = books.get(id)
-  if (book) {
-    return book
-  }
-  return undefined
+export function getBookById(id: number): Book | null {
+  return books.get(id) ?? null
 }
 
-export function getBookByTitle(title: string): Book | undefined {
-  const book = Tire.search<Book>(bookTire, title)
-  if (book) {
-    return book
-  }
-  return undefined
+export function getBookByTitle(title: string): Book | null {
+  return Tire.search<Book>(bookTire, title)
 }
 
 //RECORD
@@ -121,12 +107,8 @@ export function addRecord(record: Omit<Transaction, 'id' | 'created_at'>) {
   log(LogLevel.INFO, `user ${getUserById(newRecord.user_id)?.name} ${newRecord.type === TransactionType.SELL ? 'bought' : 'sold'} ${newRecord.quantity} <${getBookById(newRecord.book_id)?.title}>`)
 }
 
-export function getRecordById(id: number): Transaction | undefined {
-  const record = records.get(id)
-  if (record) {
-    return record
-  }
-  return undefined
+export function getRecordById(id: number): Transaction | null {
+  return records.get(id) ?? null
 }
 
 export function getRecordsByUserId(userId: number): Transaction[] {
@@ -152,6 +134,10 @@ function updateUser(user: User) {
     log(LogLevel.INFO, `user ${user.name} level up to ${newLevel}`)
     user.level = newLevel
   }
+}
+
+export function validateUsrPw(username:string, password: string) {
+  return getUserByName(username)?.password === md5(password)
 }
 
 export function makeTransaction(user: User, book: Book, quantity: number) {
