@@ -1,23 +1,24 @@
 import { User } from "../entities/user";
 import { dump, getAllBookNames, getBookByTitle, makeTransaction } from "../repository";
 import { FailMessage, SuccessMessage } from "../utils";
-const { AutoComplete } = require('enquirer');
+const { AutoComplete, NumberPrompt, prompt } = require('enquirer');
 
 export async function PurchaseIndex(user: User) {
   const books = getAllBookNames()
-  const prompt = new AutoComplete({
+  const promp = new AutoComplete({
     name: 'book',
     message: 'Pick the book you want to purchase',
-    limit: 10,
-    initial: 2,
+    limit: books.length,
+    initial: 0,
     choices: books
   });
   
-  const ans = await prompt.run()
-
-  console.log(`You picked ${ans}`)
-
+  const ans = await promp.run()
   const book = getBookByTitle(ans)
+
+  SuccessMessage(`You picked ${ans}, remaining quantity: ${book?.quantity}`)
+
+
   if (!book) {
     FailMessage('Book not found')
     return
@@ -28,18 +29,13 @@ export async function PurchaseIndex(user: User) {
     return
   }
 
-  const quantityPrompt = {
-    type: 'numeral',
-    name: 'quantity',
-    message: 'How many do you want to purchase?',
-    min: 1,
-    max: book.quantity,
-    initial: 1
-  }
 
-  const quantityAns = await prompt(quantityPrompt) as { quantity: number }
+  const quantityPrompt = new NumberPrompt({
+    name: 'number',
+    message: 'Please enter a number'
+  });
 
-  console.log(`You want to purchase ${quantityAns.quantity} of <${book.title}>`)
+  const quantityAns = await quantityPrompt.run()
 
   const confirmPrompt = {
     type: 'confirm',
@@ -52,7 +48,7 @@ export async function PurchaseIndex(user: User) {
 
   if (confirmAns.confirm) {
     console.log('Purchase confirmed')
-    makeTransaction(user, book, quantityAns.quantity)
+    makeTransaction(user, book, Number(quantityAns))
     await dump()
     SuccessMessage('Purchase successful')
   }

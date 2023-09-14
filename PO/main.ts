@@ -106,4 +106,4 @@ async function main() {
 }
 
 
-main().catch(e => null)
+main().catch(console.error)
