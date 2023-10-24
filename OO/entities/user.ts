@@ -1,4 +1,4 @@
-import { ISerializable } from "../repository-base"
+import { ISerializable } from '../repository-base'
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -12,30 +12,20 @@ export enum UserLevel {
 }
 
 export class User implements ISerializable<User> {
-  id: number
-  name: string
-  password: string
+  id: number = Math.floor(Math.random() * 1000000)
+  name?: string
+  password?: string
 
-  balance: number
-  tot_expenditure: number  
+  balance: number = 0
+  tot_expenditure: number = 0
 
-  role: UserRole
-  level: UserLevel
+  role: UserRole = UserRole.USER
+  level: UserLevel = UserLevel.NORMAL
 
-  created_at: Date
+  created_at: Date = new Date()
   updated_at?: Date
 
-  constructor(id: number, name: string, password: string, balance: number, tot_expenditure: number, role: UserRole, level: UserLevel, created_at: Date, updated_at?: Date) {
-    this.id = id
-    this.name = name
-    this.password = password
-    this.balance = balance
-    this.tot_expenditure = tot_expenditure
-    this.role = role
-    this.level = level
-    this.created_at = created_at
-    this.updated_at = updated_at
-  }
+  constructor() {}
   serialize: () => string = () => JSON.stringify(this)
   deserialize: (str: string) => User = (str) => JSON.parse(str) as User
 }

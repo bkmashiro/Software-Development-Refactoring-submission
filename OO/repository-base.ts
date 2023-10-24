@@ -1,102 +1,130 @@
-import { Trie } from "./dataStructure/Tire";
-import * as fs from "fs/promises";
+import { Trie } from './dataStructure/Tire'
+import * as fs from 'fs/promises'
 
 export interface ISerializable<T> {
-  serialize: () => string;
-  deserialize: (str: string) => T;
+  serialize: () => string
+  deserialize: (str: string) => T
 }
 
-type RepositoryItem = {
-  id: number;
-  name?: string;
-  [key: string]: any;
-} & ISerializable<RepositoryItem>;
+export type RepositoryItem = {
+  id: number
+  name?: string
+  [key: string]: any
+} & ISerializable<RepositoryItem>
 
 export class Repository<T extends RepositoryItem>
   implements ISerializable<Repository<T>>
 {
-  map: Map<number, T> = new Map();
-  tire: Trie<T> = new Trie();
-  _id: number = 0;
+  map: Map<number, T> = new Map()
+  tire: Trie<T> = new Trie()
+  name?: string
+  _type: { new (...args: any[]): T }
 
-  constructor() {}
+  constructor(private type: { new (...args: any[]): T }) {
+    this._type = type
+  }
 
   insert(item: T) {
-    this.map.set(item.id, item);
+    this.map.set(item.id, item)
     if (item.name) {
-      this.tire.insert(item.name, item);
+      this.tire.insert(item.name, item)
     }
   }
 
   search(id: number | string) {
-    if (typeof id === "number") {
-      return this.map.get(id);
+    if (typeof id === 'number') {
+      return this.map.get(id)
     } else {
-      return this.tire.search(id);
+      return this.tire.search(id)
     }
   }
 
   delete(id: number | string) {
-    if (typeof id === "number") {
-      const item = this.map.get(id);
+    if (typeof id === 'number') {
+      const item = this.map.get(id)
       if (item) {
-        this.map.delete(id);
+        this.map.delete(id)
         if (item.name) {
-          this.tire.delete(item.name);
+          this.tire.delete(item.name)
         }
       }
     } else {
-      const item = this.tire.search(id);
+      const item = this.tire.search(id)
       if (item) {
-        this.map.delete(item.id);
+        this.map.delete(item.id)
         if (item.name) {
-          this.tire.delete(item.name);
+          this.tire.delete(item.name)
         }
       }
     }
   }
 
   clear() {
-    this.map.clear();
-    this.tire = new Trie();
+    this.map.clear()
+    this.tire = new Trie()
   }
 
-  serialize() {
-    const arr = Array.from(this.map.values());
-    return JSON.stringify(arr);
+  serialize = () => {
+    const arr = Array.from(this.map.values())
+    return JSON.stringify(arr)
   }
 
   deserialize(str: string) {
-    this.clear();
-    const arr = JSON.parse(str);
-    arr.forEach((item: T) => {
-      this.insert(item);
-    });
-    return this;
+    this.clear()
+    const arr = JSON.parse(str)
+
+    const items: T[] = arr.map((itemData: T) => {
+      const item = new this._type()
+      Object.assign(item, itemData)
+      this.insert(item)
+      return item
+    })
+
+    return this
   }
 
   get size() {
-    return this.map.size;
+    return this.map.size
+  }
+
+  show() {
+    console.log(
+      `Repository ${this.name ?? '<unnamed>'}: \n -size: ${this.size}`
+    )
+    this.map.forEach((item) => {
+      console.log(item)
+    })
+    console.log('---')
   }
 }
 
 export class Dumper {
   private targets: {
-    repo: Repository<any>;
-    name: string;
-  }[] = [];
-  private path: string;
+    repo: Repository<any>
+    name: string
+  }[] = []
+  private path: string
 
   constructor(path: string) {
-    this.path = path;
+    this.path = path
   }
 
-  add(target: Repository<any>, name: string = "") {
+  track(target: Repository<any>, name: string) {
+    target.name = name
     this.targets.push({
       repo: target,
-      name: name || target.constructor.name,
-    });
-    return this;
+      name: name,
+    })
+    return this
+  }
+
+  async init() {
+    try {
+      await fs.access(this.path)
+    } catch {
+      await fs.writeFile(this.path, '{}')
+    }
+    return this
   }
 
   async dump() {
@@ -104,19 +132,24 @@ export class Dumper {
       return {
         name: item.name,
         data: item.repo.serialize(),
-      };
+      }
     })
-    await fs.writeFile(this.path, JSON.stringify(data));
-    return this;
+    await fs.writeFile(this.path, JSON.stringify(data))
+    return this
   }
 
   async load() {
-    const data = JSON.parse(await fs.readFile(this.path, "utf-8"));
-    data.forEach((item: any) => {
-      const target = this.targets.find((t) => t.name === item.name);
-      if (target) {
-        target.repo.deserialize(item.data);
+    const data = JSON.parse(await fs.readFile(this.path, 'utf-8')) as {
+      name: string
+      data: string
+    }[]
+    Object.setPrototypeOf(data, Array.prototype)
+    this.targets.forEach((item) => {
+      const dmp = data.find((d: any) => d.name === item.name)
+      if (dmp) {
+        const repo = item.repo.deserialize(dmp.data)
+        console.log(`Loaded repo ${item.name}, records: ${repo.size}`)
       }
-    });
+    })
   }
 }
