@@ -19,15 +19,26 @@ export class Repository<T extends RepositoryItem>
   tire: Trie<T> = new Trie()
   name?: string
   _type: { new (...args: any[]): T }
+  dumper?: Dumper
 
   constructor(private type: { new (...args: any[]): T }) {
     this._type = type
+    this.name = type.name
   }
 
   insert(item: T) {
     this.map.set(item.id, item)
     if (item.name) {
       this.tire.insert(item.name, item)
+    }
+    return item
+  }
+
+  has(id: number | string) {
+    if (typeof id === 'number') {
+      return this.map.has(id)
+    } else {
+      return this.tire.search(id) !== null
     }
   }
 
@@ -57,6 +68,16 @@ export class Repository<T extends RepositoryItem>
         }
       }
     }
+  }
+
+  find(fn: (item: T) => boolean) {
+    const result: T[] = []
+    this.map.forEach((item) => {
+      if (fn(item)) {
+        result.push(item)
+      }
+    })
+    return result
   }
 
   clear() {
@@ -96,6 +117,10 @@ export class Repository<T extends RepositoryItem>
     })
     console.log('---')
   }
+
+  save() {
+    this.dumper?.dump()
+  }
 }
 
 export class Dumper {
@@ -115,6 +140,7 @@ export class Dumper {
       repo: target,
       name: name,
     })
+    target.dumper = this
     return this
   }
 
