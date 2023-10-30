@@ -12,7 +12,7 @@ export enum UserLevel {
 }
 
 export class User implements ISerializable<User> {
-  id: number = Math.floor(Math.random() * 1000000)
+  id: number = Math.floor(Math.random() * 100000000)
   name?: string
   password?: string
 

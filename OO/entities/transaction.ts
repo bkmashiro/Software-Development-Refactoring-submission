@@ -1,4 +1,4 @@
-import { ISerializable } from "../repository-base"
+import { ISerializable } from '../repository-base'
 
 export enum TransactionType {
   /**
@@ -8,27 +8,32 @@ export enum TransactionType {
   /**
    * sell a book to user
    */
-  SELL = 'SELL'
+  SELL = 'SELL',
 }
 
 export class Transaction implements ISerializable<Transaction> {
-  id: number
+  id = Math.floor(Math.random() * 100000000)
   user_id: number
   book_id: number
   quantity: number
-  price_tot: number
-  type: TransactionType
-  created_at: Date
+  price_tot?: number
+  type?: TransactionType
+  created_at: Date = new Date()
 
-  constructor(id: number, user_id: number, book_id: number, quantity: number, price_tot: number, type: TransactionType, created_at: Date) {
-    this.id = id
-    this.user_id = user_id
-    this.book_id = book_id
-    this.quantity = quantity
-    this.price_tot = price_tot
-    this.type = type
-    this.created_at = created_at
+  constructor(
+    o: Partial<{
+      user_id: number
+      book_id: number
+      quantity: number
+      price_tot: number
+      type: TransactionType
+    }>
+  ) {
+    this.user_id = o.user_id!
+    this.book_id = o.book_id!
+    this.quantity = o.quantity!
   }
   serialize: () => string = () => JSON.stringify(this)
-  deserialize: (str: string) => Transaction = (str) => JSON.parse(str) as Transaction
+  deserialize: (str: string) => Transaction = (str) =>
+    JSON.parse(str) as Transaction
 }

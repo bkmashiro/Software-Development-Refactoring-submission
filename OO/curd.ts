@@ -204,6 +204,9 @@ export class CRUD<T extends RepositoryItem> {
       }
     }
 
-    return this
+    return {
+      this: this,
+      value: ctx.__PREV__,
+    }
   }
 }
