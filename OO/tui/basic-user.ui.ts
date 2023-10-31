@@ -1,10 +1,10 @@
 import { User } from "../entities/user";
-import { dump, getAllBookNames, getBookByTitle, makeTransaction } from "../repository";
+import { dump, getAllBookNames, getOneBookByTitle, makeTransaction } from "../repos";
 import { FailMessage, SuccessMessage } from "../utils";
 const { AutoComplete, NumberPrompt, prompt } = require('enquirer');
 
 export async function PurchaseIndex(user: User) {
-  const books = getAllBookNames()
+  const books = await getAllBookNames()
   const promp = new AutoComplete({
     name: 'book',
     message: 'Pick the book you want to purchase',
@@ -14,7 +14,7 @@ export async function PurchaseIndex(user: User) {
   });
   
   const ans = await promp.run()
-  const book = getBookByTitle(ans)
+  const book = await getOneBookByTitle(ans)
 
   SuccessMessage(`You picked ${ans}, remaining quantity: ${book?.quantity}`)
 

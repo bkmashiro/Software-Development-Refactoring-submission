@@ -1,5 +1,5 @@
 import { prompt } from 'enquirer';
-import { addBook, addUser, dump, getAllBookNames, getAllUserNames, getBookByTitle, getRecordById, getUserByName, removeBook, removeUser } from '../repository';
+import { addBook, addUser, dump, getAllBookNames, getAllUserNames, getBookByTitle, getRecordById, getUserByName, removeBook, removeUser } from '../repos';
 import { FailMessage, SuccessMessage, md5 } from '../utils';
 import chalk from 'chalk';
 const { Form, Confirm, NumberPrompt } = require('enquirer');
@@ -106,7 +106,7 @@ async function DeleteUser() {
   });
   const ans = await prompt.run()
 
-  const user = getUserByName(ans.username)
+  const user = await getUserByName(ans.username)
 
   if (!user) {
     FailMessage(`User ${ans.username} not exists`)
@@ -141,7 +141,7 @@ async function UpdateUser() {
   });
   const ans = await prompt.run()
 
-  const user = getUserByName(ans.username)
+  const user = await getUserByName(ans.username)
 
   if (!user) {
     FailMessage(`User ${ans.username} not exists`)
@@ -257,7 +257,7 @@ async function AddBook() {
     ]
   });
   const ans = await prompt.run()
-  const addBookResult = addBook({
+  const addBookResult = await addBook({
     isbn: ans.isbn,
     title: ans.title,
     author: ans.author,
@@ -265,7 +265,7 @@ async function AddBook() {
     price: Number(ans.price),
     quantity: Number(ans.quantity),
   });
-  if (addBookResult) {
+  if (addBookResult.value) {
     SuccessMessage('Add Book Success')
     await dump()
   } else {
@@ -364,7 +364,7 @@ async function QueryBook() {
 }
 
 async function AllBook() {
-  const books = getAllBookNames()
+  const books = await getAllBookNames()
   for (const book of books) {
     console.log(`${chalk.green(book)}`)
   }

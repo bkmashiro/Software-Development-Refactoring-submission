@@ -19,7 +19,6 @@ export class Repository<T extends RepositoryItem>
   tire: Trie<T> = new Trie()
   name?: string
   _type: { new (...args: any[]): T }
-  dumper?: Dumper
 
   constructor(private type: { new (...args: any[]): T }) {
     this._type = type
@@ -118,9 +117,6 @@ export class Repository<T extends RepositoryItem>
     console.log('---')
   }
 
-  save() {
-    this.dumper?.dump()
-  }
 }
 
 export class Dumper {
@@ -140,7 +136,6 @@ export class Dumper {
       repo: target,
       name: name,
     })
-    target.dumper = this
     return this
   }
 

@@ -19,7 +19,7 @@ export async function getAllBookNames() {
     .value.map((b: Book) => b.title)
 }
 
-export async function getBookByTitle(title: string) {
+export async function getOneBookByTitle(title: string) {
   return bookDto.find((b) => b.title === title).execute().value[0]
 }
 
@@ -53,19 +53,74 @@ export async function makeTransaction(
     })
 }
 
+export async function dump() {
+  return await dumper.dump()
+}
+
+export async function getUserByName(name: string) {
+  return userDto.find((u) => u.name === name).execute().value[0] as User
+}
+
+export function validateUsrPw(name: string, password: string) {
+  return (
+    userDto.find((u) => u.name === name && u.password === password).execute()
+      .value.length > 0
+  )
+}
+
+export function addBook(book: {
+  isbn: string
+  title: string
+  author: string
+  publisher: string
+  price: number
+  quantity: number
+}) {
+  return bookDto.create(new Book(book)).execute()
+}
+
+export function addUser(user: { name: string; rawPassword: string }) {
+  if (userDto.find((u) => u.name === user.name).execute().value.length > 0) {
+    return false
+  }
+  userDto.create(user).execute()
+  return true
+}
+
+export function addTransaction(transaction: Transaction) {
+  transactionDto.create(transaction).execute()
+}
+
+export function removeBook(id: number) {
+  return bookDto.delete(id).execute()
+}
+
+export function removeUser(id: number) {
+  return userDto.delete(id).execute()
+}
+
+export function getAllUserNames() {
+  return userDto
+    .find((u) => true)
+    .execute()
+    .value.map((u: User) => u.name)
+}
+
+export function getBookByTitle(title: string) {
+  return bookDto.find((b) => b.title === title).execute().value[0]
+}
+
+export function getUserById(id: number) {
+  return userDto.find((u) => u.id === id).execute().value[0]
+}
+
+export function getRecordById(id: number) {
+  return transactionDto.find((t) => t.id === id).execute().value[0]
+}
+
 const user = new User()
 user.name = 'John'
 user.password = '123456'
-// userRepo.insert(user)
-// new CRUD(userRepo)
-//   // .create(user)
-//   .find((u) => u.name!.startsWith('J'))
-//   .takeFirst()
-//   .print()
-//   .modify_((u) => (u.name = 'John Doe'))
-//   .print('__ALL__')
-//   .execute()
-// .save()
 ;(async () => {
   await dumper.init()
   await dumper

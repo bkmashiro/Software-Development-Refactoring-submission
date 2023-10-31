@@ -130,11 +130,6 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
-  save() {
-    this.target.save()
-    return this
-  }
-
   execute() {
     const map = {
       [CRUDAction.CREATE]: this.target.insert,
@@ -207,6 +202,15 @@ export class CRUD<T extends RepositoryItem> {
     return {
       this: this,
       value: ctx.__PREV__,
+    }
+  }
+
+  executeNoThrow() {
+    try {
+      return this.execute()
+    } catch (e) {
+      console.log(e)
+      return false
     }
   }
 }

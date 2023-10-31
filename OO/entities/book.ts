@@ -1,27 +1,33 @@
-import { ISerializable } from "../repository-base"
+import { ISerializable } from '../repository-base'
 
 export class Book implements ISerializable<Book> {
-  id: number
+  id: number = Math.floor(Math.random() * 100000000)
   isbn: string
   title: string
   author: string
   publisher: string
   price: number
   quantity: number
-  
-  public get name() : string {
+
+  public get name(): string {
     return this.title
   }
-  
-  constructor(id: number, isbn: string, title: string, author: string, publisher: string, price: number, quantity: number) {
-    this.id = id
-    this.isbn = isbn
-    this.title = title
-    this.author = author
-    this.publisher = publisher
-    this.price = price
-    this.quantity = quantity
-  }  
+
+  constructor(book : {
+    isbn: string
+    title: string
+    author: string
+    publisher: string
+    price: number
+    quantity: number
+  }) {
+    this.isbn = book.isbn
+    this.title = book.title
+    this.author = book.author
+    this.publisher = book.publisher
+    this.price = book.price
+    this.quantity = book.quantity
+  }
   serialize: () => string = () => JSON.stringify(this)
   deserialize: (str: string) => Book = (str) => JSON.parse(str) as Book
 }
