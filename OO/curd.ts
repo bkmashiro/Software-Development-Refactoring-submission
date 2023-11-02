@@ -73,17 +73,22 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
-  modify_(payload: {
-    use: T | string
-    fn: (o: any) => any
-  } | ((o: any) => any), ctx?: any) {
+  modify_(
+    payload:
+      | {
+          use: T | string
+          fn: (o: any) => any
+        }
+      | ((o: any) => any),
+    ctx?: any
+  ) {
     if (typeof payload === 'function') {
       this.queries.push({
         action: CRUDAction.MODIFY_INPLACE,
         payload: {
           use: '__PREV__',
           fn: payload,
-        }
+        },
       })
       return this
     }
@@ -131,27 +136,74 @@ export class CRUD<T extends RepositoryItem> {
   }
 
   execute() {
-    const map = {
+    const ctx = {
+      __PREV__: null as any,
+    } as {
+      [key: string]: any
+    }
+
+    const map = this.getCRUDMethods(ctx)
+    // const parsePayload = this.parsePayload(ctx)
+
+    let cnt = 0
+    for (const q of this.queries) {
+      const fn = map[q.action] as Function
+      if (fn) {
+        const ret = fn.call(this.target, this.parsePayload(q.payload, ctx), ctx)
+        ctx.__PREV__ = ret
+        ctx[`$${cnt++}`] = ret
+      }
+    }
+
+    return {
+      this: this,
+      value: ctx.__PREV__,
+    }
+  }
+
+  private parsePayload(
+    payload: T | Partial<T> | number | string | any,
+    ctx: { [key: string]: any }
+  ) {
+    if (typeof payload === 'string' && payload === '__PREV__') {
+      payload = ctx.__PREV__
+    }
+
+    if (typeof payload === 'string' && payload.startsWith('$')) {
+      payload = ctx[payload]
+    }
+
+    return payload as any
+  }
+
+  private getCRUDMethods(ctx?: any) {
+    return {
       [CRUDAction.CREATE]: this.target.insert,
       [CRUDAction.READ]: this.target.search,
       [CRUDAction.UPDATE]: this.target.insert,
       [CRUDAction.DELETE]: this.target.delete,
-      [CRUDAction.MODIFY_INPLACE]: ({use, fn}: {
+      [CRUDAction.MODIFY_INPLACE]: ({
+        use,
+        fn,
+      }: {
         use: T | string
         fn: (o: T) => any
-      }) => { 
-        const item = parsePayload(use) as T
+      }) => {
+        const item = this.parsePayload(use, ctx) as T
         console.log(item)
         if (item) {
           fn(item)
           return item
         }
       },
-      [CRUDAction.MODIFY_RETURN]: ({use, fn}: {
+      [CRUDAction.MODIFY_RETURN]: ({
+        use,
+        fn,
+      }: {
         use: T | string
         fn: (o: T) => any
-      }) => { 
-        const item = parsePayload(use) as T
+      }) => {
+        const item = this.parsePayload(use, ctx) as T
         console.log(item)
         if (item) {
           return fn(item)
@@ -169,39 +221,6 @@ export class CRUD<T extends RepositoryItem> {
         console.log(`\n`)
         return ctx['__PREV__']
       },
-    }
-
-    const ctx = {
-      __PREV__: null as any,
-    } as {
-      [key: string]: any
-    }
-
-    const parsePayload = (payload: T | Partial<T> | number | string | any) => {
-      if (typeof payload === 'string' && payload === '__PREV__') {
-        payload = ctx.__PREV__
-      }
-
-      if (typeof payload === 'string' && payload.startsWith('$')) {
-        payload = ctx[payload]
-      }
-
-      return payload as any
-    }
-
-    let cnt = 0
-    for (const q of this.queries) {
-      const fn = map[q.action] as Function
-      if (fn) {
-        const ret = fn.call(this.target, parsePayload(q.payload), ctx)
-        ctx.__PREV__ = ret
-        ctx[`$${cnt++}`] = ret
-      }
-    }
-
-    return {
-      this: this,
-      value: ctx.__PREV__,
     }
   }
 
