@@ -121,11 +121,11 @@ export function getRecordById(id: number) {
 const user = new User()
 user.name = 'John'
 user.password = '123456'
-;(async () => {
-  await dumper.init()
-  await dumper
-    .track(userRepo, 'user')
-    .track(bookRepo, 'book')
-    .track(transactionRepo, 'trans')
-    .load()
-})()
+  ; (async () => {
+    await dumper.init()
+    await dumper
+      .track(userRepo, 'user')
+      .track(bookRepo, 'book')
+      .track(transactionRepo, 'trans')
+      .load()
+  })()

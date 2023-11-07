@@ -59,13 +59,13 @@ export class CRUD<T extends RepositoryItem> {
       typeof option === 'function'
         ? option
         : (item: T) => {
-            for (const key in option) {
-              if (item[key] !== option[key]) {
-                return false
-              }
+          for (const key in option) {
+            if (item[key] !== option[key]) {
+              return false
             }
-            return true
           }
+          return true
+        }
     this.queries.push({
       action: CRUDAction.FIND,
       payload: fn,
@@ -76,9 +76,9 @@ export class CRUD<T extends RepositoryItem> {
   modify_(
     payload:
       | {
-          use: T | string
-          fn: (o: any) => any
-        }
+        use: T | string
+        fn: (o: any) => any
+      }
       | ((o: any) => any),
     ctx?: any
   ) {
