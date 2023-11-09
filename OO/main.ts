@@ -39,7 +39,7 @@ const choise_admin = [
 ]
 
 function getChoises() {
-  let choises : any[] = []
+  let choises: any[] = []
   if (isAdmin()) {
     choises = choises.concat(choise_admin)
   }
@@ -48,10 +48,41 @@ function getChoises() {
   } else {
     choises = choises.concat(choise_logged_out)
   }
-  
+
   return choises.concat(choiseBase)
 }
 
+const handlerMap = {
+  Purchase: async () => {
+    if (!loginResult.user) {
+      FailMessage('You need to login first')
+    }
+    await PurchaseIndex(loginResult.user!)
+  },
+  Management: async () => {
+    if (isAdmin()) {
+      await managementIndex()
+    } else {
+      FailMessage('You are not authorized to access this page')
+    }
+  },
+  Login: async () => {
+    loginResult.user = await login() ?? undefined
+  },
+  Register: async () => {
+    await AddUser()
+  },
+  Exit: () => {
+    SuccessMessage('Bye!');
+  },
+  About: about,
+  Help: () => {
+    FailMessage('Sorry, no help for you');
+  },
+  Logout: () => {
+    loginResult.user = undefined
+  },
+}
 
 async function main() {
   displayWelcome()
@@ -65,39 +96,9 @@ async function main() {
       choices: getChoises(),
     }
     ans = await prompt(promptOptions) as { action: string }
-    switch (ans.action) {
-      case 'Purchase':
-        if (!loginResult.user) {
-          FailMessage('You need to login first')
-          break
-        }
-        await PurchaseIndex(loginResult.user)
-        break;
-      case 'Management':
-        if (isAdmin()) {
-          await managementIndex()
-        } else {
-          FailMessage('You are not authorized to access this page')
-        }
-        break;
-      case 'Login':
-        loginResult.user = await login() ?? undefined
-        break;
-      case 'Register':
-        await AddUser()
-        break;
-      case 'Exit':
-        SuccessMessage('Bye!');
-        break;
-      case 'About':
-        about()
-        break;
-      case 'Help':
-        FailMessage('Sorry, no help for you');
-        break;
-      case 'Logout':
-        loginResult.user = undefined
-        break;
+    
+    if (handlerMap[ans.action]) {
+      await handlerMap[ans.action]()
     }
   }
 }
