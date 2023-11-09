@@ -1,12 +1,12 @@
 import chalk from 'chalk';
 
-export function centerText(text:string) {
-  const terminalWidth = process.stdout.columns; // 获取控制台的宽度
-  const centeredText : string[] = [];
+export function centerText(text: string) {
+  const terminalWidth = process.stdout.columns;
+  const centeredText: string[] = [];
 
   text.split('\n').forEach(line => {
-    const padding = Math.max(0, Math.floor((terminalWidth - line.length) / 2)); // 计算左侧需要的空格数量
-    const centeredLine = ' '.repeat(padding) + line; // 在每一行文本前面添加空格
+    const padding = Math.max(0, Math.floor((terminalWidth - line.length) / 2));
+    const centeredLine = ' '.repeat(padding) + line;
     centeredText.push(centeredLine);
   });
 
