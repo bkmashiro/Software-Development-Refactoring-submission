@@ -185,14 +185,17 @@ async function QueryUser() {
   });
   const ans = await prompt.run()
 
-  const user = getUserByName(ans.username)
+  const user = await getUserByName(ans.username)
 
   if (!user) {
     FailMessage(`User ${ans.username} not exists`)
     return
   }
-
+  const dropFields = ['serialize', 'deserialize']
   for (const [key, value] of Object.entries(user)) {
+    if (key in dropFields) {
+       continue
+    }
     console.log(`${chalk.green(key.padStart(16))}\: ${chalk.yellow(value)}`)
   }
 }
@@ -214,7 +217,7 @@ async function BookManagement() {
       { name: 'Delete Book', message: 'Delete Book' },
       { name: 'Update Book', message: 'Update Book' },
       { name: 'Query Book', message: 'Query Book' },
-      { name: 'All Book', message: 'All Book'},
+      { name: 'All Book', message: 'All Book' },
       { name: 'Back', message: 'Back' },
     ],
   }

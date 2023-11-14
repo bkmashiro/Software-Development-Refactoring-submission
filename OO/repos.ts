@@ -3,6 +3,7 @@ import { Book } from './entities/book'
 import { Transaction } from './entities/transaction'
 import { User } from './entities/user'
 import { Dumper, Repository } from './repository-base'
+import { md5 } from './utils'
 
 export const dumper = new Dumper('./data/data.json')
 export const userRepo = new Repository(User)
@@ -58,7 +59,7 @@ export async function dump() {
 }
 
 export async function getUserByName(name: string) {
-  return userDto.find((u) => u.name === name).execute().value[0] as User
+  return userDto.find((u) => u.name === name).execute().value[0]
 }
 
 export function validateUsrPw(name: string, password: string) {
@@ -83,7 +84,10 @@ export function addUser(user: { name: string; rawPassword: string }) {
   if (userDto.find((u) => u.name === user.name).execute().value.length > 0) {
     return false
   }
-  userDto.create(user).execute()
+  const u = new User()
+  u.name = user.name
+  u.password = md5(user.rawPassword)
+  userDto.create(u).execute()
   return true
 }
 
@@ -118,14 +122,13 @@ export function getRecordById(id: number) {
   return transactionDto.find((t) => t.id === id).execute().value[0]
 }
 
-const user = new User()
-user.name = 'John'
-user.password = '123456'
-  ; (async () => {
-    await dumper.init()
-    await dumper
-      .track(userRepo, 'user')
-      .track(bookRepo, 'book')
-      .track(transactionRepo, 'trans')
-      .load()
-  })()
+
+export async function InitRepos() {
+  await dumper.init()
+  await dumper
+    .track(userRepo, 'user')
+    .track(bookRepo, 'book')
+    .track(transactionRepo, 'trans')
+    .load()
+}
+

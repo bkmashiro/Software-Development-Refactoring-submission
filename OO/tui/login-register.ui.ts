@@ -1,13 +1,13 @@
 import chalk from 'chalk'
 import { getUserByName, validateUsrPw } from '../repos'
-import { clearScreen } from '../utils'
+import { clearScreen, md5 } from '../utils'
 import { centerText } from './welcome.ui'
 const { AuthPrompt } = require('enquirer')
 
 export async function login() {
   let _uname = '' // this is dirty, but I don't know how to pass the value out
   function authenticate(value: { username: any; password: any }, state: any) {
-    if (validateUsrPw(value.username, value.password)) {
+    if (validateUsrPw(value.username, md5(value.password))) {
       _uname = value.username
       return true
     }

@@ -154,7 +154,7 @@ export class CRUD<T extends RepositoryItem> {
         ctx[`$${cnt++}`] = ret
       }
     }
-
+    console.log(ctx)
     return {
       this: this,
       value: ctx.__PREV__,

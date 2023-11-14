@@ -1,5 +1,6 @@
 import { about } from "../PO/tui/about.ui"
 import { User } from "./entities/user"
+import { InitRepos } from "./repos"
 import { PurchaseIndex } from "./tui/basic-user.ui"
 import { login } from "./tui/login-register.ui"
 import { managementIndex, AddUser } from "./tui/management.ui"
@@ -68,6 +69,7 @@ const handlerMap = {
   },
   Login: async () => {
     loginResult.user = await login() ?? undefined
+    console.log(loginResult)
   },
   Register: async () => {
     await AddUser()
@@ -85,6 +87,7 @@ const handlerMap = {
 }
 
 async function main() {
+  await InitRepos()
   displayWelcome()
 
   let ans = { action: '' }
@@ -96,7 +99,7 @@ async function main() {
       choices: getChoises(),
     }
     ans = await prompt(promptOptions) as { action: string }
-    
+
     if (handlerMap[ans.action]) {
       await handlerMap[ans.action]()
     }
