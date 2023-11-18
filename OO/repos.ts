@@ -31,7 +31,7 @@ export async function makeTransaction(
 ) {
   transactionDto
     .create(
-      new Transaction({
+      Object.assign(new Transaction(), {
         user_id: user.id,
         book_id: book.id,
         quantity,
@@ -69,7 +69,7 @@ export function validateUsrPw(name: string, password: string) {
   )
 }
 
-export function addBook(book: {
+export async function addBook(book: {
   isbn: string
   title: string
   author: string
@@ -77,7 +77,9 @@ export function addBook(book: {
   price: number
   quantity: number
 }) {
-  return bookDto.create(new Book(book)).execute()
+  return bookDto.create(
+    Object.assign(new Book(), book)
+  ).execute()
 }
 
 export function addUser(user: { name: string; rawPassword: string }) {

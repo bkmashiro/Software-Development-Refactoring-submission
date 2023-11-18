@@ -3,7 +3,8 @@ import { User } from "./entities/user"
 import { InitRepos } from "./repos"
 import { PurchaseIndex } from "./tui/basic-user.ui"
 import { login } from "./tui/login-register.ui"
-import { managementIndex, AddUser } from "./tui/management.ui"
+import { managementIndex } from "./tui/management.ui"
+import { AddUser } from './tui/operations/UserOps'
 import { displayWelcome } from "./tui/welcome.ui"
 import { FailMessage, SuccessMessage } from "./utils"
 import { prompt } from 'enquirer';
