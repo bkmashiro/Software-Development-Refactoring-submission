@@ -131,6 +131,7 @@ async function DeleteUser() {
 
 }
 
+const validRoles = ['admin', 'user'];
 async function UpdateUser() {
   const prompt = new Form({
     name: 'user',
@@ -164,7 +165,7 @@ async function UpdateUser() {
     user.password = md5(modifyAns.password)
   }
 
-  if (modifyAns.role in ['admin', 'user']) {
+  if (validRoles.includes(modifyAns.role)) {
     user.role = modifyAns.role
   } else {
     FailMessage(`Invalid role ${modifyAns.role}`)
@@ -193,8 +194,8 @@ async function QueryUser() {
   }
   const dropFields = ['serialize', 'deserialize']
   for (const [key, value] of Object.entries(user)) {
-    if (key in dropFields) {
-       continue
+    if (dropFields.includes(key)) {
+      continue
     }
     console.log(`${chalk.green(key.padStart(16))}\: ${chalk.yellow(value)}`)
   }

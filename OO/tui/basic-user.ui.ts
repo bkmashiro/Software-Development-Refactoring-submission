@@ -18,7 +18,6 @@ export async function PurchaseIndex(user: User) {
 
   SuccessMessage(`You picked ${ans}, remaining quantity: ${book?.quantity}`)
 
-
   if (!book) {
     FailMessage('Book not found')
     return
@@ -28,7 +27,6 @@ export async function PurchaseIndex(user: User) {
     FailMessage('Book out of stock')
     return
   }
-
 
   const quantityPrompt = new NumberPrompt({
     name: 'number',

@@ -122,7 +122,6 @@ export function getRecordById(id: number) {
   return transactionDto.find((t) => t.id === id).execute().value[0]
 }
 
-
 export async function InitRepos() {
   await dumper.init()
   await dumper
@@ -131,4 +130,3 @@ export async function InitRepos() {
     .track(transactionRepo, 'trans')
     .load()
 }
-

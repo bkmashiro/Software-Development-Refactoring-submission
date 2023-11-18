@@ -131,6 +131,7 @@ async function DeleteUser() {
 
 }
 
+const validRoles = ['admin', 'user'];
 async function UpdateUser() {
   const prompt = new Form({
     name: 'user',
@@ -164,7 +165,7 @@ async function UpdateUser() {
     user.password = md5(modifyAns.password)
   }
 
-  if (modifyAns.role in ['admin', 'user']) {
+  if (validRoles.includes(modifyAns.role)) {
     user.role = modifyAns.role
   } else {
     FailMessage(`Invalid role ${modifyAns.role}`)
