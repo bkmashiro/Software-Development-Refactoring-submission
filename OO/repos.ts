@@ -1,7 +1,7 @@
 import { CRUD } from './curd'
 import { Book } from './entities/book'
 import { Transaction } from './entities/transaction'
-import { User } from './entities/user'
+import { User, UserLevel } from './entities/user'
 import { Dumper, Repository } from './repository-base'
 import { md5 } from './utils'
 
@@ -24,6 +24,18 @@ export async function getOneBookByTitle(title: string) {
   return bookDto.find((b) => b.title === title).execute().value[0]
 }
 
+export const discount = {
+  normal: 1,
+  gold: 0.9,
+  platinum: 0.8,
+}
+
+export const level = {
+  normal: 0,
+  gold: 1000,
+  platinum: 10000,
+}
+
 export async function makeTransaction(
   user: User,
   book: Book,
@@ -31,8 +43,13 @@ export async function makeTransaction(
 ) {
   // check balance
   const balance = user.balance
+  const quantityInStock = book.quantity
+  if (quantityInStock < quantity) {
+    throw new Error('Insufficient quantity')
+  }
   const price = book.price
-  if (balance < price * quantity) {
+  const discountRate = discount[user.level]
+  if (balance < price * quantity * discountRate) {
     throw new Error('Insufficient balance')
   }
 
@@ -53,14 +70,27 @@ export async function makeTransaction(
       b.quantity -= quantity
     })
 
-  
+  // update user level
+  const newLevel = Object.entries(level)
+    .filter(([_, value]) => user.tot_expenditure >= value)
+    .sort((a, b) => b[1] - a[1])
+    .at(0)?.[0] as keyof typeof level
+
+  if (newLevel && newLevel !== user.level) {
+    user.level = newLevel as UserLevel
+  }
 
   userDto
     .find((u: User) => u.id === user.id)
     .takeFirst()
     .modify_((u: User) => {
-      u.balance -= book.price * quantity
+      u.balance -= book.price * quantity * discountRate
+      u.tot_expenditure += book.price * quantity * discountRate
+      u.level = newLevel as UserLevel
     })
+
+
+  await dump()
 }
 
 export async function dump() {
