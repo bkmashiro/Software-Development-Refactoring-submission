@@ -1,7 +1,7 @@
 import { ISerializable } from '../repository-base'
 
 export class Book implements ISerializable<Book> {
-  id: number = Math.floor(Math.random() * 100000000)
+  id: number
   isbn: string
   title: string
   author: string

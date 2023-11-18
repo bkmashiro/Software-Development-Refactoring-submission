@@ -1,5 +1,8 @@
+import { exit } from 'process'
 import { Trie } from './dataStructure/Tire'
 import * as fs from 'fs/promises'
+
+
 
 export interface ISerializable<T> {
   serialize: () => string
@@ -15,17 +18,26 @@ export type RepositoryItem = {
 export class Repository<T extends RepositoryItem>
   implements ISerializable<Repository<T>>
 {
+  meta: Record<string, any> = {
+    lastId: 0
+  }
   map: Map<number, T> = new Map()
   tire: Trie<T> = new Trie()
   name?: string
-  _type: { new (...args: any[]): T }
+  _type: { new(...args: any[]): T }
 
-  constructor(private type: { new (...args: any[]): T }) {
+  constructor(private type: { new(...args: any[]): T }) {
     this._type = type
     this.name = type.name
   }
 
   insert(item: T) {
+    // set id
+    if (!item.id) {
+      item.id = this.incId()
+    } else {
+      console.warn('warning: manually set an id for item is not recommended')
+    }
     this.map.set(item.id, item)
     if (item.name) {
       this.tire.insert(item.name, item)
@@ -86,19 +98,28 @@ export class Repository<T extends RepositoryItem>
 
   serialize = () => {
     const arr = Array.from(this.map.values())
-    return JSON.stringify(arr)
+    return JSON.stringify({
+      meta: this.meta,
+      data: arr,
+    })
   }
 
   deserialize(str: string) {
     this.clear()
-    const arr = JSON.parse(str)
+    console.log('deserialize', JSON.parse(str))
+    const {
+      meta,
+      data,
+    } = JSON.parse(str)
 
-    const items: T[] = arr.map((itemData: T) => {
+    data.map((itemData: T) => {
       const item = new this._type()
       Object.assign(item, itemData)
       this.insert(item)
       return item
     })
+
+    this.meta = meta
 
     return this
   }
@@ -117,6 +138,14 @@ export class Repository<T extends RepositoryItem>
     console.log('---')
   }
 
+  get lastId() {
+    return this.meta.lastId
+  }
+
+  incId() {
+    this.meta.lastId++
+    return this.meta.lastId
+  }
 }
 
 export class Dumper {
@@ -160,17 +189,22 @@ export class Dumper {
   }
 
   async load() {
-    const data = JSON.parse(await fs.readFile(this.path, 'utf-8')) as {
-      name: string
-      data: string
-    }[]
-    Object.setPrototypeOf(data, Array.prototype)
-    this.targets.forEach((item) => {
-      const dmp = data.find((d: any) => d.name === item.name)
-      if (dmp) {
-        const repo = item.repo.deserialize(dmp.data)
-        console.log(`Loaded repo ${item.name}, records: ${repo.size}`)
-      }
-    })
+    try {
+      const data = JSON.parse(await fs.readFile(this.path, 'utf-8')) as {
+        name: string
+        data: string
+      }[]
+      Object.setPrototypeOf(data, Array.prototype)
+      this.targets.forEach((item) => {
+        const dmp = data.find((d: any) => d.name === item.name)
+        if (dmp) {
+          const repo = item.repo.deserialize(dmp.data)
+          console.log(`Loaded repo ${item.name}, records: ${repo.size}`)
+        }
+      })
+    } catch(e: any) { 
+      console.error('Failed to load data, exit. reason:', e.message)
+      exit(1)
+    }
   }
 }

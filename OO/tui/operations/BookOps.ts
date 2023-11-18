@@ -2,6 +2,7 @@ const { Form } = require("enquirer");
 import chalk from "chalk";
 import { addBook, getBookByTitle, removeBook, dump, getAllBookNames } from '../../repos';
 import { SuccessMessage, FailMessage } from '../../utils';
+import { printDropped } from "../../utils/print";
 
 export async function AddBook() {
   const prompt = new Form({
@@ -116,9 +117,7 @@ export async function QueryBook() {
     return;
   }
 
-  for (const [key, value] of Object.entries(book)) {
-    console.log(`${chalk.green(key.padStart(16))}\: ${chalk.yellow(value)}`);
-  }
+  printDropped(book);
 }
 
 export async function AllBook() {

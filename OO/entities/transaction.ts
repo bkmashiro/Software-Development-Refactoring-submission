@@ -12,7 +12,7 @@ export enum TransactionType {
 }
 
 export class Transaction implements ISerializable<Transaction> {
-  id = Math.floor(Math.random() * 100000000)
+  id: number
   user_id: number
   book_id: number
   quantity: number
@@ -20,7 +20,7 @@ export class Transaction implements ISerializable<Transaction> {
   type?: TransactionType
   created_at: Date = new Date()
 
-  constructor() {}
+  constructor() { }
   serialize: () => string = () => JSON.stringify(this)
   deserialize: (str: string) => Transaction = (str) =>
     JSON.parse(str) as Transaction
