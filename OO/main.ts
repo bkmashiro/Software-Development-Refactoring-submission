@@ -8,6 +8,7 @@ import { AddUser } from './tui/operations/UserOps'
 import { displayWelcome } from "./tui/welcome.ui"
 import { FailMessage, SuccessMessage } from "./utils"
 import { prompt } from 'enquirer';
+import { setDebug } from "./utils/debug"
 
 let loginResult: {
   user?: User
@@ -88,6 +89,7 @@ const handlerMap = {
 }
 
 async function main() {
+  setDebug(true)
   await InitRepos()
   displayWelcome()
 

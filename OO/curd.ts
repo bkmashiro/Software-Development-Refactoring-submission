@@ -1,4 +1,5 @@
 import { Repository, RepositoryItem } from './repository-base'
+import { debug } from './utils/debug'
 
 enum CRUDAction {
   CREATE,
@@ -11,6 +12,8 @@ enum CRUDAction {
   PRINT,
 }
 
+const PREV_TOKEN = '__PREV__'
+const ALL_TOKEN = '__ALL__'
 export class CRUD<T extends RepositoryItem> {
   target: Repository<T>
   queries: {
@@ -86,7 +89,7 @@ export class CRUD<T extends RepositoryItem> {
       this.queries.push({
         action: CRUDAction.MODIFY_INPLACE,
         payload: {
-          use: '__PREV__',
+          use: PREV_TOKEN,
           fn: payload,
         },
       })
@@ -103,7 +106,7 @@ export class CRUD<T extends RepositoryItem> {
     this.queries.push({
       action: CRUDAction.MODIFY_RETURN,
       payload: {
-        use: '__PREV__',
+        use: PREV_TOKEN,
         fn: (o: any) => {
           const ret = o.splice(0, payload)
           return ret
@@ -117,7 +120,7 @@ export class CRUD<T extends RepositoryItem> {
     this.queries.push({
       action: CRUDAction.MODIFY_RETURN,
       payload: {
-        use: '__PREV__',
+        use: PREV_TOKEN,
         fn: (o: any) => {
           const ret = o[0]
           return ret
@@ -127,7 +130,7 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
-  print(key: string = '__PREV__', ctx?: any) {
+  print(key: string = PREV_TOKEN, ctx?: any) {
     this.queries.push({
       action: CRUDAction.PRINT,
       payload: key,
@@ -138,8 +141,6 @@ export class CRUD<T extends RepositoryItem> {
   execute() {
     const ctx = {
       __PREV__: null as any,
-    } as {
-      [key: string]: any
     }
 
     const map = this.getCRUDMethods(ctx)
@@ -154,7 +155,11 @@ export class CRUD<T extends RepositoryItem> {
         ctx[`$${cnt++}`] = ret
       }
     }
-    console.log(ctx)
+    debug(ctx)
+
+    // clear up
+    this.queries = []
+
     return {
       this: this,
       value: ctx.__PREV__,
@@ -165,7 +170,7 @@ export class CRUD<T extends RepositoryItem> {
     payload: T | Partial<T> | number | string | any,
     ctx: { [key: string]: any }
   ) {
-    if (typeof payload === 'string' && payload === '__PREV__') {
+    if (typeof payload === 'string' && payload === PREV_TOKEN) {
       payload = ctx.__PREV__
     }
 
@@ -212,14 +217,14 @@ export class CRUD<T extends RepositoryItem> {
       [CRUDAction.FIND]: this.target.find,
       [CRUDAction.PRINT]: (val: '__ALL__' | string, ctx: any) => {
         console.log(`== PRINT ==`)
-        if (val === '__ALL__') {
+        if (val === ALL_TOKEN) {
           console.log(ctx)
         } else {
           console.log(val)
         }
         console.warn(`For objects, values may be updated`)
         console.log(`\n`)
-        return ctx['__PREV__']
+        return ctx[PREV_TOKEN]
       },
     }
   }

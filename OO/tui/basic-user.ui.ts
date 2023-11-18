@@ -5,6 +5,11 @@ const { AutoComplete, NumberPrompt, prompt } = require('enquirer');
 
 export async function PurchaseIndex(user: User) {
   const books = await getAllBookNames()
+  if (books.length === 0) {
+    FailMessage('No books available')
+    return
+  }
+
   const promp = new AutoComplete({
     name: 'book',
     message: 'Pick the book you want to purchase',
@@ -46,7 +51,12 @@ export async function PurchaseIndex(user: User) {
 
   if (confirmAns.confirm) {
     console.log('Purchase confirmed')
-    makeTransaction(user, book, Number(quantityAns))
+    try {
+      await makeTransaction(user, book, Number(quantityAns))
+    } catch (e: any) {
+      FailMessage(e.message)
+      return
+    }
     await dump()
     SuccessMessage('Purchase successful')
   }

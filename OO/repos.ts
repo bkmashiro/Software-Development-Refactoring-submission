@@ -29,6 +29,13 @@ export async function makeTransaction(
   book: Book,
   quantity: number
 ) {
+  // check balance
+  const balance = user.balance
+  const price = book.price
+  if (balance < price * quantity) {
+    throw new Error('Insufficient balance')
+  }
+
   transactionDto
     .create(
       Object.assign(new Transaction(), {
@@ -45,6 +52,8 @@ export async function makeTransaction(
     .modify_((b: Book) => {
       b.quantity -= quantity
     })
+
+  
 
   userDto
     .find((u: User) => u.id === user.id)
