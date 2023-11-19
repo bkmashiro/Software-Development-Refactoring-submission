@@ -1,4 +1,3 @@
-import { about } from '../PO/tui/about.ui'
 import { User } from './entities/user'
 import { InitRepos } from './facade/Misc'
 import { PurchaseIndex } from './tui/basic-user.ui'
@@ -7,8 +6,6 @@ import { managementIndex } from './tui/management.ui'
 import { AddUser } from './tui/operations/UserOps'
 import { displayWelcome } from './tui/welcome.ui'
 import { FailMessage, SuccessMessage } from './utils'
-import { prompt } from 'enquirer'
-import { setDebug } from './utils/debug'
 import { CRUD } from './curd'
 import { Book } from './entities/book'
 import { Transaction } from './entities/transaction'
@@ -79,7 +76,6 @@ const handlerMap = {
     SuccessMessage('Bye!')
     process.exit(0)
   },
-  About: about,
   Help: () => {
     FailMessage('WIP! Not implemented yet')
   },
@@ -94,7 +90,7 @@ async function main() {
   await InitRepos()
 
   displayWelcome()
-  
+
   const promptOptions = {
     type: 'select',
     name: 'action',
