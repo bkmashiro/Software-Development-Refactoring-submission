@@ -1,4 +1,3 @@
-import { prompt } from 'enquirer';
 import { actions } from '../utils/actions';
 import { AddUser, DeleteUser, UpdateUser, QueryUser, AllUser } from './operations/UserOps';
 import { AddBook, DeleteBook, UpdateBook, QueryBook, AllBook } from './operations/BookOps';
@@ -83,16 +82,7 @@ async function TransactionManagementIndex() {
     ],
   }
 
-  let act = { action: '' }
-
-  while (act.action !== 'Back') {
-    act = await prompt(promptOptions) as { action: string }
-    switch (act.action) {
-      case 'Query Transaction':
-        await QueryTransaction()
-        break;
-      case 'Back':
-        break;
-    }
-  }
+  await actions({
+    'Query Transaction': QueryTransaction,
+  }, promptOptions)()
 }

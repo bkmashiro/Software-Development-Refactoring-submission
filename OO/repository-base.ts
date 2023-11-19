@@ -2,8 +2,6 @@ import { exit } from 'process'
 import { Trie } from './dataStructure/Tire'
 import * as fs from 'fs/promises'
 
-
-
 export interface ISerializable<T> {
   serialize: () => string
   deserialize: (str: string) => T
@@ -196,9 +194,9 @@ export class Dumper {
       }[]
       Object.setPrototypeOf(data, Array.prototype)
       this.targets.forEach((item) => {
-        const dmp = data.find((d: any) => d.name === item.name)
-        if (dmp) {
-          const repo = item.repo.deserialize(dmp.data)
+        const dump = data.find((d: any) => d.name === item.name)
+        if (dump) {
+          const repo = item.repo.deserialize(dump.data)
           console.log(`Loaded repo ${item.name}, records: ${repo.size}`)
         }
       })

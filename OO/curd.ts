@@ -76,7 +76,7 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
-  modify_(
+  modifyInplace(
     payload:
       | {
         use: T | string

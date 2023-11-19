@@ -21,6 +21,8 @@ The shop assistant can conduct relevant statistical work on orders and sales.
 
 ## How to run
 
-execute `ts-node test.ts` to run test.
+execute `ts-node main.ts` to run test.
+
+Or run `tsc main.ts && node main`
 
 if you use tsc, compile it into js file and run it.

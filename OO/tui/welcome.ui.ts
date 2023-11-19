@@ -14,7 +14,7 @@ export function centerText(text: string) {
 }
 
 export function displayWelcome() {
-  const myText = `
+  const liberian = `
    __    _ __              _           
   / /   (_) /_  ___  _____(_)___  ____ 
  / /   / / __ \\/ _ \\/ ___/ / __ \\/ __ \\
@@ -22,8 +22,8 @@ export function displayWelcome() {
 \\____/_/\\.___/\\___/_/  /_/\\__,_/_/ /_/ 
 `;
 
-  console.log(centerText(chalk.bgBlack(chalk.green(myText))));
+  console.log(centerText(chalk.bgBlack(chalk.green(liberian))));
   console.log(centerText(chalk.bgBlue(chalk.white('Liberian: A open source book store management system'))));
   console.log(centerText(chalk.bgBlue(chalk.white('author: baka_mashiro  contact: a[at]yuzhes.com'))));
-  console.log(centerText(chalk.bgCyan(chalk.white('\nThis project is under MIT license.'))));
+  console.log(centerText(chalk.bgCyan(chalk.white('\nThis project is licensed under MIT license.'))));
 }

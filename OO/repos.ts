@@ -66,7 +66,7 @@ export async function makeTransaction(
   bookDto
     .find((b: Book) => b.id === book.id)
     .takeFirst()
-    .modify_((b: Book) => {
+    .modifyInplace((b: Book) => {
       b.quantity -= quantity
     })
 
@@ -83,12 +83,11 @@ export async function makeTransaction(
   userDto
     .find((u: User) => u.id === user.id)
     .takeFirst()
-    .modify_((u: User) => {
+    .modifyInplace((u: User) => {
       u.balance -= book.price * quantity * discountRate
       u.tot_expenditure += book.price * quantity * discountRate
       u.level = newLevel as UserLevel
     })
-
 
   await dump()
 }
