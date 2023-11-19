@@ -1,7 +1,7 @@
 import { prompt } from 'enquirer'
 
 export function actions(
-  actionDict: { [key: string]: () => Promise<void> },
+  actionDict: { [key: string]: () => Promise<void> | void },
   promptOptions
 ) {
   return async function () {

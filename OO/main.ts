@@ -13,6 +13,13 @@ import { CRUD } from './curd'
 import { Book } from './entities/book'
 import { Transaction } from './entities/transaction'
 import { Dumper, Repository } from './repository-base'
+import {
+  choise_admin,
+  choise_logged_in,
+  choise_logged_out,
+  choiseBase,
+} from './choice-constants'
+import { actions } from './utils/actions'
 
 export const dumper = new Dumper('./data/data.json')
 export const userRepo = new Repository(User)
@@ -22,41 +29,23 @@ export const userDto = new CRUD(userRepo)
 export const bookDto = new CRUD(bookRepo)
 export const transactionDto = new CRUD(transactionRepo)
 
-let loginResult: {
+let lr: {
   user?: User
 } = {}
 
 function isAdmin() {
-  if (!loginResult.user || loginResult.user.role !== 'admin') {
-    return false
-  }
-  return true
+  return lr.user?.role === 'admin'
 }
 
-const choiseBase = [
-  { name: 'Help', message: 'Get help' },
-  { name: 'About', message: 'About this program' },
-  { name: 'Exit', message: 'Exit the program' },
-]
-
-const choise_logged_out = [
-  { name: 'Login', message: 'Login to your account' },
-  { name: 'Register', message: 'Register a new account' },
-]
-
-const choise_logged_in = [
-  { name: 'Purchase', message: 'Purchase' },
-  { name: 'Logout', message: 'Logout' },
-]
-
-const choise_admin = [{ name: 'Management', message: 'Management' }]
-
 function getChoises() {
-  let choises: any[] = []
+  let choises: {
+    name: string
+    message: string
+  }[] = []
   if (isAdmin()) {
     choises = choises.concat(choise_admin)
   }
-  if (loginResult.user) {
+  if (lr.user) {
     choises = choises.concat(choise_logged_in)
   } else {
     choises = choises.concat(choise_logged_out)
@@ -67,10 +56,10 @@ function getChoises() {
 
 const handlerMap = {
   Purchase: async () => {
-    if (!loginResult.user) {
+    if (!lr.user) {
       FailMessage('You need to login first')
     }
-    await PurchaseIndex(loginResult.user!)
+    await PurchaseIndex(lr.user!)
   },
   Management: async () => {
     if (isAdmin()) {
@@ -80,43 +69,42 @@ const handlerMap = {
     }
   },
   Login: async () => {
-    loginResult.user = (await login()) ?? undefined
-    console.log(loginResult)
+    lr.user = (await login()) ?? undefined
+    console.log(lr)
   },
   Register: async () => {
     await AddUser()
   },
   Exit: () => {
     SuccessMessage('Bye!')
+    process.exit(0)
   },
   About: about,
   Help: () => {
-    FailMessage('Sorry, no help for you')
+    FailMessage('WIP! Not implemented yet')
   },
   Logout: () => {
-    loginResult.user = undefined
+    lr.user = undefined
   },
 }
 
 async function main() {
-  setDebug(true)
+  // setDebug(true)
+
   await InitRepos()
+
   displayWelcome()
-
-  let ans = { action: '' }
-  while (ans.action !== 'Exit') {
-    const promptOptions = {
-      type: 'select',
-      name: 'action',
-      message: 'What do you want to do?',
-      choices: getChoises(),
-    }
-    ans = (await prompt(promptOptions)) as { action: string }
-
-    if (handlerMap[ans.action]) {
-      await handlerMap[ans.action]()
-    }
+  
+  const promptOptions = {
+    type: 'select',
+    name: 'action',
+    message: 'What do you want to do?',
+    choices: getChoises(),
   }
+
+  await actions(handlerMap, promptOptions)()
 }
 
-main()
+main().catch((e) => {
+  console.error(e)
+})

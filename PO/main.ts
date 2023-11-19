@@ -95,7 +95,7 @@ async function main() {
         about()
         break;
       case 'Help':
-        FailMessage('Sorry, no help for you');
+        FailMessage('WIP! Not implemented yet');
         break;
       case 'Logout':
         loginResult.user = undefined
