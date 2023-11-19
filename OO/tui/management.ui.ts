@@ -1,7 +1,19 @@
-import { actions } from '../utils/actions';
-import { AddUser, DeleteUser, UpdateUser, QueryUser, AllUser } from './operations/UserOps';
-import { AddBook, DeleteBook, UpdateBook, QueryBook, AllBook } from './operations/BookOps';
-import { QueryTransaction } from './operations/TransOps';
+import { actions } from '../utils/actions'
+import {
+  AddUser,
+  DeleteUser,
+  UpdateUser,
+  QueryUser,
+  AllUser,
+} from './operations/UserOps'
+import {
+  AddBook,
+  DeleteBook,
+  UpdateBook,
+  QueryBook,
+  AllBook,
+} from './operations/BookOps'
+import { QueryTransaction } from './operations/TransOps'
 
 export async function managementIndex() {
   const promptOptions = {
@@ -16,11 +28,14 @@ export async function managementIndex() {
     ],
   }
 
-  await actions({
-    'User Management': UserManagementIndex,
-    'Book Management': BookManagementIndex,
-    'Transaction Management': TransactionManagementIndex,
-  }, promptOptions)()
+  await actions(
+    {
+      'User Management': UserManagementIndex,
+      'Book Management': BookManagementIndex,
+      'Transaction Management': TransactionManagementIndex,
+    },
+    promptOptions
+  )()
 }
 
 async function UserManagementIndex() {
@@ -38,13 +53,16 @@ async function UserManagementIndex() {
     ],
   }
 
-  await actions({
-    'Add User': AddUser,
-    'Delete User': DeleteUser,
-    'Update User': UpdateUser,
-    'Query User': QueryUser,
-    'All User': AllUser,
-  }, promptOptions)()
+  await actions(
+    {
+      'Add User': AddUser,
+      'Delete User': DeleteUser,
+      'Update User': UpdateUser,
+      'Query User': QueryUser,
+      'All User': AllUser,
+    },
+    promptOptions
+  )()
 }
 
 async function BookManagementIndex() {
@@ -62,13 +80,16 @@ async function BookManagementIndex() {
     ],
   }
 
-  await actions({
-    'Add Book': AddBook,
-    'Delete Book': DeleteBook,
-    'Update Book': UpdateBook,
-    'Query Book': QueryBook,
-    'All Book': AllBook,
-  }, promptOptions)()
+  await actions(
+    {
+      'Add Book': AddBook,
+      'Delete Book': DeleteBook,
+      'Update Book': UpdateBook,
+      'Query Book': QueryBook,
+      'All Book': AllBook,
+    },
+    promptOptions
+  )()
 }
 
 async function TransactionManagementIndex() {
@@ -82,7 +103,10 @@ async function TransactionManagementIndex() {
     ],
   }
 
-  await actions({
-    'Query Transaction': QueryTransaction,
-  }, promptOptions)()
+  await actions(
+    {
+      'Query Transaction': QueryTransaction,
+    },
+    promptOptions
+  )()
 }

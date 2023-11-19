@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import { getUserByName, validateUsrPw } from '../repos'
+import { getUserByName, validateUsrPw } from '../facade/UserFacade'
 import { clearScreen, md5 } from '../utils'
 import { centerText } from './welcome.ui'
 const { AuthPrompt } = require('enquirer')

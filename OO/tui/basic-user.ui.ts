@@ -1,7 +1,9 @@
-import { User } from "../entities/user";
-import { dump, getAllBookNames, getOneBookByTitle, makeTransaction } from "../repos";
-import { FailMessage, SuccessMessage } from "../utils";
-const { AutoComplete, NumberPrompt, prompt } = require('enquirer');
+import { User } from '../entities/user'
+import { dump } from '../facade/Misc'
+import { makeTransaction } from '../facade/TransFacade'
+import { getAllBookNames, getOneBookByTitle } from '../facade/BookFacade'
+import { FailMessage, SuccessMessage } from '../utils'
+const { AutoComplete, NumberPrompt, prompt } = require('enquirer')
 
 export async function PurchaseIndex(user: User) {
   const books = await getAllBookNames()
@@ -15,9 +17,9 @@ export async function PurchaseIndex(user: User) {
     message: 'Pick the book you want to purchase',
     limit: books.length,
     initial: 0,
-    choices: books
-  });
-  
+    choices: books,
+  })
+
   const ans = await promp.run()
   const book = await getOneBookByTitle(ans)
 
@@ -35,8 +37,8 @@ export async function PurchaseIndex(user: User) {
 
   const quantityPrompt = new NumberPrompt({
     name: 'number',
-    message: 'Please enter a number'
-  });
+    message: 'Please enter a number',
+  })
 
   const quantityAns = await quantityPrompt.run()
 
@@ -44,10 +46,10 @@ export async function PurchaseIndex(user: User) {
     type: 'confirm',
     name: 'confirm',
     message: 'Confirm purchase?',
-    initial: true
+    initial: true,
   }
 
-  const confirmAns = await prompt(confirmPrompt) as { confirm: boolean }
+  const confirmAns = (await prompt(confirmPrompt)) as { confirm: boolean }
 
   if (confirmAns.confirm) {
     console.log('Purchase confirmed')

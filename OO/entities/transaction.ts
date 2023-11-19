@@ -20,7 +20,7 @@ export class Transaction implements ISerializable<Transaction> {
   type?: TransactionType
   created_at: Date = new Date()
 
-  constructor() { }
+  constructor() {}
   serialize: () => string = () => JSON.stringify(this)
   deserialize: (str: string) => Transaction = (str) =>
     JSON.parse(str) as Transaction

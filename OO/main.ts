@@ -1,14 +1,26 @@
-import { about } from "../PO/tui/about.ui"
-import { User } from "./entities/user"
-import { InitRepos } from "./repos"
-import { PurchaseIndex } from "./tui/basic-user.ui"
-import { login } from "./tui/login-register.ui"
-import { managementIndex } from "./tui/management.ui"
+import { about } from '../PO/tui/about.ui'
+import { User } from './entities/user'
+import { InitRepos } from './facade/Misc'
+import { PurchaseIndex } from './tui/basic-user.ui'
+import { login } from './tui/login-register.ui'
+import { managementIndex } from './tui/management.ui'
 import { AddUser } from './tui/operations/UserOps'
-import { displayWelcome } from "./tui/welcome.ui"
-import { FailMessage, SuccessMessage } from "./utils"
-import { prompt } from 'enquirer';
-import { setDebug } from "./utils/debug"
+import { displayWelcome } from './tui/welcome.ui'
+import { FailMessage, SuccessMessage } from './utils'
+import { prompt } from 'enquirer'
+import { setDebug } from './utils/debug'
+import { CRUD } from './curd'
+import { Book } from './entities/book'
+import { Transaction } from './entities/transaction'
+import { Dumper, Repository } from './repository-base'
+
+export const dumper = new Dumper('./data/data.json')
+export const userRepo = new Repository(User)
+export const bookRepo = new Repository(Book)
+export const transactionRepo = new Repository(Transaction)
+export const userDto = new CRUD(userRepo)
+export const bookDto = new CRUD(bookRepo)
+export const transactionDto = new CRUD(transactionRepo)
 
 let loginResult: {
   user?: User
@@ -34,12 +46,10 @@ const choise_logged_out = [
 
 const choise_logged_in = [
   { name: 'Purchase', message: 'Purchase' },
-  { name: 'Logout', message: 'Logout' }
+  { name: 'Logout', message: 'Logout' },
 ]
 
-const choise_admin = [
-  { name: 'Management', message: 'Management' },
-]
+const choise_admin = [{ name: 'Management', message: 'Management' }]
 
 function getChoises() {
   let choises: any[] = []
@@ -70,18 +80,18 @@ const handlerMap = {
     }
   },
   Login: async () => {
-    loginResult.user = await login() ?? undefined
+    loginResult.user = (await login()) ?? undefined
     console.log(loginResult)
   },
   Register: async () => {
     await AddUser()
   },
   Exit: () => {
-    SuccessMessage('Bye!');
+    SuccessMessage('Bye!')
   },
   About: about,
   Help: () => {
-    FailMessage('Sorry, no help for you');
+    FailMessage('Sorry, no help for you')
   },
   Logout: () => {
     loginResult.user = undefined
@@ -101,7 +111,7 @@ async function main() {
       message: 'What do you want to do?',
       choices: getChoises(),
     }
-    ans = await prompt(promptOptions) as { action: string }
+    ans = (await prompt(promptOptions)) as { action: string }
 
     if (handlerMap[ans.action]) {
       await handlerMap[ans.action]()

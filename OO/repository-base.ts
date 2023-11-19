@@ -17,14 +17,14 @@ export class Repository<T extends RepositoryItem>
   implements ISerializable<Repository<T>>
 {
   meta: Record<string, any> = {
-    lastId: 0
+    lastId: 0,
   }
   map: Map<number, T> = new Map()
   tire: Trie<T> = new Trie()
   name?: string
-  _type: { new(...args: any[]): T }
+  _type: { new (...args: any[]): T }
 
-  constructor(private type: { new(...args: any[]): T }) {
+  constructor(private type: { new (...args: any[]): T }) {
     this._type = type
     this.name = type.name
   }
@@ -105,10 +105,7 @@ export class Repository<T extends RepositoryItem>
   deserialize(str: string) {
     this.clear()
     console.log('deserialize', JSON.parse(str))
-    const {
-      meta,
-      data,
-    } = JSON.parse(str)
+    const { meta, data } = JSON.parse(str)
 
     data.map((itemData: T) => {
       const item = new this._type()
@@ -200,7 +197,7 @@ export class Dumper {
           console.log(`Loaded repo ${item.name}, records: ${repo.size}`)
         }
       })
-    } catch(e: any) { 
+    } catch (e: any) {
       console.error('Failed to load data, exit. reason:', e.message)
       exit(1)
     }
