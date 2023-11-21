@@ -78,10 +78,10 @@ export function expect<T>(exp: (args: any) => T, tobe: T): boolean {
 
 export function clearScreen() {
   // for windows
-  console.clear()
+  // console.clear()
 
-  // for unix-like systems
-  console.log('\x1Bc')
+  // // for unix-like systems
+  // console.log('\x1Bc')
 }
 
 export function FailMessage(msg: string) {

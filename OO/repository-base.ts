@@ -1,6 +1,7 @@
 import { exit } from 'process'
 import { Trie } from './dataStructure/Tire'
 import * as fs from 'fs/promises'
+import { debug } from './utils/debug'
 
 export interface ISerializable<T> {
   serialize: () => string
@@ -104,7 +105,7 @@ export class Repository<T extends RepositoryItem>
 
   deserialize(str: string) {
     this.clear()
-    console.log('deserialize', JSON.parse(str))
+    debug('deserialize', JSON.parse(str))
     const { meta, data } = JSON.parse(str)
 
     data.map((itemData: T) => {
@@ -124,13 +125,13 @@ export class Repository<T extends RepositoryItem>
   }
 
   show() {
-    console.log(
+    debug(
       `Repository ${this.name ?? '<unnamed>'}: \n -size: ${this.size}`
     )
     this.map.forEach((item) => {
-      console.log(item)
+      debug(item)
     })
-    console.log('---')
+    debug('---')
   }
 
   get lastId() {
@@ -194,7 +195,7 @@ export class Dumper {
         const dump = data.find((d: any) => d.name === item.name)
         if (dump) {
           const repo = item.repo.deserialize(dump.data)
-          console.log(`Loaded repo ${item.name}, records: ${repo.size}`)
+          debug(`Loaded repo ${item.name}, records: ${repo.size}`)
         }
       })
     } catch (e: any) {

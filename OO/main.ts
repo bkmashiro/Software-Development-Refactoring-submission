@@ -11,12 +11,13 @@ import { Book } from './entities/book'
 import { Transaction } from './entities/transaction'
 import { Dumper, Repository } from './repository-base'
 import {
-  choise_admin,
-  choise_logged_in,
-  choise_logged_out,
+  choise_admin as choice_admin,
+  choise_logged_in as choice_logged_in,
+  choise_logged_out as choice_logged_out,
   choiseBase,
 } from './choice-constants'
 import { actions } from './utils/actions'
+import { debug, setDebug } from './utils/debug'
 
 export const dumper = new Dumper('./data/data.json')
 export const userRepo = new Repository(User)
@@ -27,10 +28,14 @@ export const bookDto = new CRUD(bookRepo)
 export const transactionDto = new CRUD(transactionRepo)
 
 let lr: {
-  user?: User
+  user?: User,
+  [key: string]: any
 } = {}
 
+const getLr = () => lr
+
 function isAdmin() {
+  debug('is admin ', lr)
   return lr.user?.role === 'admin'
 }
 
@@ -40,12 +45,12 @@ function getChoises() {
     message: string
   }[] = []
   if (isAdmin()) {
-    choises = choises.concat(choise_admin)
+    choises = choises.concat(choice_admin)
   }
   if (lr.user) {
-    choises = choises.concat(choise_logged_in)
+    choises = choises.concat(choice_logged_in)
   } else {
-    choises = choises.concat(choise_logged_out)
+    choises = choises.concat(choice_logged_out)
   }
 
   return choises.concat(choiseBase)
@@ -66,8 +71,7 @@ const handlerMap = {
     }
   },
   Login: async () => {
-    lr.user = (await login()) ?? undefined
-    console.log(lr)
+    lr.user = (await login())
   },
   Register: async () => {
     await AddUser()
@@ -91,14 +95,16 @@ async function main() {
 
   displayWelcome()
 
-  const promptOptions = {
+  const promptOptions = () => ({
     type: 'select',
     name: 'action',
     message: 'What do you want to do?',
     choices: getChoises(),
-  }
+  })
 
   await actions(handlerMap, promptOptions)()
+
+  debug(`lr2`, lr)
 }
 
 main().catch((e) => {

@@ -1,6 +1,6 @@
 export const choiseBase = [
   { name: 'Help', message: 'Get help' },
-  { name: 'About', message: 'About this program' },
+  // { name: 'About', message: 'About this program' },
   { name: 'Exit', message: 'Exit the program' },
 ]
 export const choise_logged_out = [

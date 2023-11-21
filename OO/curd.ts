@@ -194,7 +194,7 @@ export class CRUD<T extends RepositoryItem> {
         fn: (o: T) => any
       }) => {
         const item = this.parsePayload(use, ctx) as T
-        console.log(item)
+        debug(item)
         if (item) {
           fn(item)
           return item
@@ -208,21 +208,21 @@ export class CRUD<T extends RepositoryItem> {
         fn: (o: T) => any
       }) => {
         const item = this.parsePayload(use, ctx) as T
-        console.log(item)
+        debug(item)
         if (item) {
           return fn(item)
         }
       },
       [CRUDAction.FIND]: this.target.find,
       [CRUDAction.PRINT]: (val: '__ALL__' | string, ctx: any) => {
-        console.log(`== PRINT ==`)
+        debug(`== PRINT ==`)
         if (val === ALL_TOKEN) {
-          console.log(ctx)
+          debug(ctx)
         } else {
-          console.log(val)
+          debug(val)
         }
         console.warn(`For objects, values may be updated`)
-        console.log(`\n`)
+        debug(`\n`)
         return ctx[PREV_TOKEN]
       },
     }
@@ -232,7 +232,7 @@ export class CRUD<T extends RepositoryItem> {
     try {
       return this.execute()
     } catch (e) {
-      console.log(e)
+      debug(e)
       return false
     }
   }

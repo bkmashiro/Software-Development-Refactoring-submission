@@ -19,7 +19,7 @@ export async function login() {
   const prompt = new CustomAuthPrompt({
     name: 'password',
     message: 'Please enter your password',
-    username: 'rajat-sr',
+    username: 'syz',
     password: '1234567',
     choices: [
       { name: 'username', message: 'username' },
