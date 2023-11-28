@@ -11,9 +11,9 @@ import { Book } from './entities/book'
 import { Transaction } from './entities/transaction'
 import { Dumper, Repository } from './repository-base'
 import {
-  choise_admin as choice_admin,
-  choise_logged_in as choice_logged_in,
-  choise_logged_out as choice_logged_out,
+  choice_admin,
+  choice_logged_in,
+  choice_logged_out,
   choiseBase,
 } from './choice-constants'
 import { actions } from './utils/actions'
@@ -28,25 +28,32 @@ export const bookDto = new CRUD(bookRepo)
 export const transactionDto = new CRUD(transactionRepo)
 
 let lr: {
-  user?: User,
+  user?: User
   [key: string]: any
 } = {}
-
-const getLr = () => lr
 
 function isAdmin() {
   debug('is admin ', lr)
   return lr.user?.role === 'admin'
 }
 
+/**
+ * this function returns a list of choices for the user to select from
+ * choices are based on the user's role
+ *  - if the user is an admin, they will see the admin choices
+ *  - if the user is logged in, they will see the logged in choices
+ *  - if the user is logged out, they will see the logged out choices
+ */
 function getChoises() {
   let choises: {
     name: string
     message: string
   }[] = []
+
   if (isAdmin()) {
     choises = choises.concat(choice_admin)
   }
+
   if (lr.user) {
     choises = choises.concat(choice_logged_in)
   } else {
@@ -71,7 +78,7 @@ const handlerMap = {
     }
   },
   Login: async () => {
-    lr.user = (await login())
+    lr.user = await login()
   },
   Register: async () => {
     await AddUser()

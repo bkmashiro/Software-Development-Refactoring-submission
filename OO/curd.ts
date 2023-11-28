@@ -14,6 +14,27 @@ enum CRUDAction {
 
 const PREV_TOKEN = '__PREV__'
 const ALL_TOKEN = '__ALL__'
+/**
+ * Generic CRUD class that can be used to chain CRUD operations.
+ *
+ * @example
+ * ```ts
+ * const userDto = new CRUD(userRepo)
+ * // create a new user
+ * userDto.create({
+ *  name: 'John Doe',
+ *  role: 'admin',
+ * })
+ * ```
+ *
+ * can only applied to a repository that stores items of type T.
+ *
+ * once `execute` is called, all the operations will be executed in order.
+ *
+ * and the result of the last operation will be returned.
+ *
+ * Note that, the queries will be cleared after `execute` is called.
+ */
 export class CRUD<T extends RepositoryItem> {
   target: Repository<T>
   queries: {
@@ -25,6 +46,13 @@ export class CRUD<T extends RepositoryItem> {
     this.target = target
   }
 
+  /**
+   * Creates a new entry in the database.
+   *
+   * @param payload - The data to be stored in the database.
+   * @param ctx - Optional context information.
+   * @returns The current instance of the CRUD object.
+   */
   create(payload: any, ctx?: any) {
     this.queries.push({
       action: CRUDAction.CREATE,
@@ -33,6 +61,12 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
+  /**
+   * Reads data from a source.
+   * @param payload - The data to be read.
+   * @param ctx - The context for the read operation.
+   * @returns The current instance of the CRUD object.
+   */
   read(payload: any, ctx?: any) {
     this.queries.push({
       action: CRUDAction.READ,
@@ -41,6 +75,12 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
+  /**
+   * Updates the data with the specified payload.
+   * @param payload - The data to be updated.
+   * @param ctx - Optional context information.
+   * @returns The current instance of the CRUD object.
+   */
   update(payload: any, ctx?: any) {
     this.queries.push({
       action: CRUDAction.UPDATE,
@@ -49,6 +89,13 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
+  /**
+   * Deletes a record.
+   *
+   * @param payload - The data to be deleted.
+   * @param ctx - Optional context information.
+   * @returns The current instance of the CRUD object.
+   */
   delete(payload: any, ctx?: any) {
     this.queries.push({
       action: CRUDAction.DELETE,
@@ -57,6 +104,13 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
+  /**
+   * Finds items in the collection based on the provided option or filter function.
+   *
+   * @param option - The option or filter function used to find the items.
+   * @param ctx - Optional context object.
+   * @returns The current instance of the CRUD object.
+   */
   find(option: Partial<T> | ((item: T) => boolean), ctx?: any) {
     const fn =
       typeof option === 'function'
@@ -76,6 +130,13 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
+  /**
+   * Modifies the object in place by applying the provided payload.
+   *
+   * @param payload - The payload to apply for modification. It can be either an object with `use` and `fn` properties, or a function.
+   * @param ctx - Optional context for the modification.
+   * @returns The modified object.
+   */
   modifyInplace(
     payload:
       | {
@@ -102,6 +163,12 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
+  /**
+   * Takes a specified number of elements from the beginning of the array and returns them.
+   * @param payload The number of elements to take from the array.
+   * @param ctx Optional context object.
+   * @returns The modified instance of the class.
+   */
   take(payload: number, ctx?: any) {
     this.queries.push({
       action: CRUDAction.MODIFY_RETURN,
@@ -116,6 +183,11 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
+  /**
+   * Takes the first element from the result set (must be a array).
+   * @param ctx Optional context object.
+   * @returns The modified instance of the CRUD object.
+   */
   takeFirst(ctx?: any) {
     this.queries.push({
       action: CRUDAction.MODIFY_RETURN,
@@ -130,6 +202,14 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
+  /**
+   * Prints the result of the previous operation.
+   * This action is only for debugging purposes, will not affect the result.
+   * @deprecated
+   * @param key
+   * @param ctx
+   * @returns
+   */
   print(key: string = PREV_TOKEN, ctx?: any) {
     this.queries.push({
       action: CRUDAction.PRINT,
@@ -138,6 +218,10 @@ export class CRUD<T extends RepositoryItem> {
     return this
   }
 
+  /**
+   * Executes the CRUD operations defined in the queries array.
+   * @returns An object containing the current instance of the class and the value of the last operation.
+   */
   execute() {
     const ctx = {
       __PREV__: null as any,
@@ -228,6 +312,11 @@ export class CRUD<T extends RepositoryItem> {
     }
   }
 
+  /**
+   * Executes the operation and handles any exceptions without throwing them.
+   *
+   * @returns {boolean|any} Returns true if the operation is executed successfully, otherwise false.
+   */
   executeNoThrow() {
     try {
       return this.execute()

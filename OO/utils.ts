@@ -73,15 +73,20 @@ export function md5(data: string): string {
 }
 
 export function expect<T>(exp: (args: any) => T, tobe: T): boolean {
-  throw new Error('Not implemented')
+  const result = exp(tobe)
+  if (result) {
+    return true
+  } else {
+    throw new Error(`expect ${result} to be ${tobe}`)
+  }
 }
 
 export function clearScreen() {
   // for windows
-  // console.clear()
+  console.clear()
 
-  // // for unix-like systems
-  // console.log('\x1Bc')
+  // for unix-like systems
+  console.log('\x1Bc')
 }
 
 export function FailMessage(msg: string) {

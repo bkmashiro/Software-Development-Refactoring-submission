@@ -14,6 +14,10 @@ export type RepositoryItem = {
   [key: string]: any
 } & ISerializable<RepositoryItem>
 
+/**
+ * Represents a generic repository that stores items of type T.
+ * @template T - The type of items stored in the repository.
+ */
 export class Repository<T extends RepositoryItem>
   implements ISerializable<Repository<T>>
 {
@@ -23,15 +27,21 @@ export class Repository<T extends RepositoryItem>
   map: Map<number, T> = new Map()
   tire: Trie<T> = new Trie()
   name?: string
-  _type: { new (...args: any[]): T }
+  entity: { new (...args: any[]): T }
 
-  constructor(private type: { new (...args: any[]): T }) {
-    this._type = type
-    this.name = type.name
+  constructor(private _constructor: { new (...args: any[]): T }) {
+    this.entity = _constructor
+    this.name = _constructor.name
   }
 
+  /**
+   * Inserts an item into the repository.
+   * If the item does not have an id, it will automatically generate one.
+   * If the item has a name, it will also be inserted into the tire.
+   * @param item The item to be inserted.
+   * @returns The inserted item.
+   */
   insert(item: T) {
-    // set id
     if (!item.id) {
       item.id = this.incId()
     } else {
@@ -44,6 +54,11 @@ export class Repository<T extends RepositoryItem>
     return item
   }
 
+  /**
+   * Checks if the repository has an item with the specified ID.
+   * @param id - The ID of the item to check.
+   * @returns True if the repository has an item with the specified ID, false otherwise.
+   */
   has(id: number | string) {
     if (typeof id === 'number') {
       return this.map.has(id)
@@ -52,6 +67,11 @@ export class Repository<T extends RepositoryItem>
     }
   }
 
+  /**
+   * Searches for an item in the repository based on the provided id.
+   * @param id - The id of the item to search for.
+   * @returns The item with the matching id, if found.
+   */
   search(id: number | string) {
     if (typeof id === 'number') {
       return this.map.get(id)
@@ -60,6 +80,13 @@ export class Repository<T extends RepositoryItem>
     }
   }
 
+  /**
+   * Deletes an item from the repository based on its ID.
+   * If the ID is a number, it will be deleted from the map.
+   * If the ID is a string, it will be searched in the tire and deleted from the map.
+   * If the item has a name, it will also be deleted from the tire.
+   * @param {number | string} id - The ID of the item to be deleted.
+   */
   delete(id: number | string) {
     if (typeof id === 'number') {
       const item = this.map.get(id)
@@ -80,6 +107,12 @@ export class Repository<T extends RepositoryItem>
     }
   }
 
+  /**
+   * Finds all items in the repository that satisfy the given condition.
+   * 
+   * @param fn The condition function to be applied to each item.
+   * @returns An array of items that satisfy the condition.
+   */
   find(fn: (item: T) => boolean) {
     const result: T[] = []
     this.map.forEach((item) => {
@@ -109,7 +142,7 @@ export class Repository<T extends RepositoryItem>
     const { meta, data } = JSON.parse(str)
 
     data.map((itemData: T) => {
-      const item = new this._type()
+      const item = new this.entity()
       Object.assign(item, itemData)
       this.insert(item)
       return item
@@ -120,14 +153,19 @@ export class Repository<T extends RepositoryItem>
     return this
   }
 
+  /**
+   * Gets the size of the repository.
+   * @returns The size of the repository.
+   */
   get size() {
     return this.map.size
   }
 
+  /**
+   * show the repository in the console
+   */
   show() {
-    debug(
-      `Repository ${this.name ?? '<unnamed>'}: \n -size: ${this.size}`
-    )
+    debug(`Repository ${this.name ?? '<unnamed>'}: \n -size: ${this.size}`)
     this.map.forEach((item) => {
       debug(item)
     })
@@ -138,12 +176,21 @@ export class Repository<T extends RepositoryItem>
     return this.meta.lastId
   }
 
-  incId() {
+  /**
+   * Increases the lastId value by 1 and returns the updated value.
+   * DO NOT CALL THIS METHOD MANUALLY.
+   * @returns The updated lastId value.
+   */
+  private incId() {
     this.meta.lastId++
     return this.meta.lastId
   }
 }
 
+
+/**
+ * Represents a Dumper class that tracks repositories, dumps their data to a file, and loads data from a file to initialize repositories.
+ */
 export class Dumper {
   private targets: {
     repo: Repository<any>
@@ -151,10 +198,20 @@ export class Dumper {
   }[] = []
   private path: string
 
+  /**
+   * Creates an instance of Dumper.
+   * @param path - The file path where the data will be dumped and loaded from.
+   */
   constructor(path: string) {
     this.path = path
   }
 
+  /**
+   * Tracks a repository by assigning a name to it and adding it to the list of targets.
+   * @param target - The repository to track.
+   * @param name - The name to assign to the repository.
+   * @returns The current instance of the Dumper.
+   */
   track(target: Repository<any>, name: string) {
     target.name = name
     this.targets.push({
@@ -164,6 +221,10 @@ export class Dumper {
     return this
   }
 
+  /**
+   * Initializes the Dumper by creating the data file if it doesn't exist.
+   * @returns The current instance of the Dumper.
+   */
   async init() {
     try {
       await fs.access(this.path)
@@ -173,6 +234,10 @@ export class Dumper {
     return this
   }
 
+  /**
+   * Dumps the data of the tracked repositories to the file.
+   * @returns A promise that resolves to the current instance of the Dumper.
+   */
   async dump() {
     const data = this.targets.map((item, i) => {
       return {
@@ -184,6 +249,10 @@ export class Dumper {
     return this
   }
 
+  /**
+   * Loads the data from the specified file path and initializes the repositories.
+   * @returns A promise that resolves once the data is loaded and repositories are initialized.
+   */
   async load() {
     try {
       const data = JSON.parse(await fs.readFile(this.path, 'utf-8')) as {
