@@ -15,7 +15,7 @@ export interface User {
   password: string
 
   balance: number
-  tot_expenditure: number  
+  tot_expenditure: number
 
   role: UserRole
   level: UserLevel
@@ -23,4 +23,4 @@ export interface User {
   created_at: Date
   updated_at?: Date
 }
-export const validRoles = ['admin', 'user'];
+export const validRoles = ['admin', 'user']

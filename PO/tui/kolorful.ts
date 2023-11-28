@@ -33,7 +33,7 @@ const json = JSON.parse(fs.readFileSync(path.join(__dirname, './output_sanyue.js
 /**
  * we purposely use Chinese function name
  */
-export function 三月七(...args: any[]) {
+export function march(...args: any[]) {
   // this is hard cutting, may cause inconsistency
   // set this to 2, 3 ... to make the image smaller( skip some pixels )
   const zoom_factor = 1

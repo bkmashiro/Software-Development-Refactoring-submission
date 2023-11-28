@@ -1,7 +1,12 @@
-import { User } from "../entities/user";
-import { dump, getAllBookNames, getBookByTitle, makeTransaction } from "../repository";
-import { FailMessage, SuccessMessage } from "../utils";
-const { AutoComplete, NumberPrompt, prompt } = require('enquirer');
+import { User } from '../entities/user'
+import {
+  dump,
+  getAllBookNames,
+  getBookByTitle,
+  makeTransaction,
+} from '../repository'
+import { FailMessage, SuccessMessage } from '../utils'
+const { AutoComplete, NumberPrompt, prompt } = require('enquirer')
 
 export async function PurchaseIndex(user: User) {
   const books = getAllBookNames()
@@ -10,14 +15,13 @@ export async function PurchaseIndex(user: User) {
     message: 'Pick the book you want to purchase',
     limit: books.length,
     initial: 0,
-    choices: books
-  });
-  
+    choices: books,
+  })
+
   const ans = await promp.run()
   const book = getBookByTitle(ans)
 
   SuccessMessage(`You picked ${ans}, remaining quantity: ${book?.quantity}`)
-
 
   if (!book) {
     FailMessage('Book not found')
@@ -29,11 +33,10 @@ export async function PurchaseIndex(user: User) {
     return
   }
 
-
   const quantityPrompt = new NumberPrompt({
     name: 'number',
-    message: 'Please enter a number'
-  });
+    message: 'Please enter a number',
+  })
 
   const quantityAns = await quantityPrompt.run()
 
@@ -41,10 +44,10 @@ export async function PurchaseIndex(user: User) {
     type: 'confirm',
     name: 'confirm',
     message: 'Confirm purchase?',
-    initial: true
+    initial: true,
   }
 
-  const confirmAns = await prompt(confirmPrompt) as { confirm: boolean }
+  const confirmAns = (await prompt(confirmPrompt)) as { confirm: boolean }
 
   if (confirmAns.confirm) {
     console.log('Purchase confirmed')

@@ -1,12 +1,12 @@
-import { load } from "./repository";
-import { login } from "./tui/login-register.ui";
-import { AddUser, managementIndex } from "./tui/management.ui";
-import { displayWelcome } from "./tui/welcome.ui";
-import { prompt } from 'enquirer';
-import { User } from './entities/user';
-import { FailMessage, SuccessMessage, clearScreen } from "./utils";
-import { about } from "./tui/about.ui";
-import { PurchaseIndex } from "./tui/basic-user.ui";
+import { load } from './repository'
+import { login } from './tui/login-register.ui'
+import { AddUser, managementIndex } from './tui/management.ui'
+import { displayWelcome } from './tui/welcome.ui'
+import { prompt } from 'enquirer'
+import { User } from './entities/user'
+import { FailMessage, SuccessMessage, clearScreen } from './utils'
+import { about } from './tui/about.ui'
+import { PurchaseIndex } from './tui/basic-user.ui'
 
 let loginResult: {
   user?: User
@@ -32,15 +32,13 @@ const choise_logged_out = [
 
 const choise_logged_in = [
   { name: 'Purchase', message: 'Purchase' },
-  { name: 'Logout', message: 'Logout' }
+  { name: 'Logout', message: 'Logout' },
 ]
 
-const choise_admin = [
-  { name: 'Management', message: 'Management' },
-]
+const choise_admin = [{ name: 'Management', message: 'Management' }]
 
 function getChoises() {
-  let choises : any[] = []
+  let choises: any[] = []
   if (isAdmin()) {
     choises = choises.concat(choise_admin)
   }
@@ -49,14 +47,14 @@ function getChoises() {
   } else {
     choises = choises.concat(choise_logged_out)
   }
-  
+
   return choises.concat(choiseBase)
 }
 
 async function main() {
-  await load();
+  await load()
   clearScreen()
-  displayWelcome();
+  displayWelcome()
 
   let ans = { action: '' }
   while (ans.action !== 'Exit') {
@@ -66,7 +64,7 @@ async function main() {
       message: 'What do you want to do?',
       choices: getChoises(),
     }
-    ans = await prompt(promptOptions) as { action: string }
+    ans = (await prompt(promptOptions)) as { action: string }
     switch (ans.action) {
       case 'Purchase':
         if (!loginResult.user) {
@@ -74,36 +72,34 @@ async function main() {
           break
         }
         await PurchaseIndex(loginResult.user)
-        break;
+        break
       case 'Management':
         if (isAdmin()) {
           await managementIndex()
         } else {
           FailMessage('You are not authorized to access this page')
         }
-        break;
+        break
       case 'Login':
-        loginResult.user = await login() ?? undefined
-        break;
+        loginResult.user = (await login()) ?? undefined
+        break
       case 'Register':
         await AddUser()
-        break;
+        break
       case 'Exit':
-        SuccessMessage('Bye!');
-        break;
+        SuccessMessage('Bye!')
+        break
       case 'About':
         about()
-        break;
+        break
       case 'Help':
-        FailMessage('WIP! Not implemented yet');
-        break;
+        FailMessage('WIP! Not implemented yet')
+        break
       case 'Logout':
         loginResult.user = undefined
-        break;
+        break
     }
   }
-
 }
-
 
 main().catch(console.error)

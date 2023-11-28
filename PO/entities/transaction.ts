@@ -6,7 +6,7 @@ export enum TransactionType {
   /**
    * sell a book to user
    */
-  SELL = 'SELL'
+  SELL = 'SELL',
 }
 
 export interface Transaction {

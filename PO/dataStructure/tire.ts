@@ -1,58 +1,66 @@
 export namespace Tire {
   export interface TrieNode<T> {
-    children: { [key: string]: TrieNode<T> };
-    value: T | null;
+    children: { [key: string]: TrieNode<T> }
+    value: T | null
   }
 
   export function createTrieNode<T>(): TrieNode<T> {
-    return { children: {}, value: null };
+    return { children: {}, value: null }
   }
 
   export function insert<T>(root: TrieNode<T>, word: string, value: T) {
-    let node = root;
+    let node = root
     for (const char of word) {
       if (!node.children[char]) {
-        node.children[char] = createTrieNode();
+        node.children[char] = createTrieNode()
       }
-      node = node.children[char];
+      node = node.children[char]
     }
-    node.value = value;
+    node.value = value
   }
 
   export function search<T>(root: TrieNode<T>, word: string): T | null {
-    let node = root;
+    let node = root
     for (const char of word) {
       if (!node.children[char]) {
-        return null;
+        return null
       }
-      node = node.children[char];
+      node = node.children[char]
     }
-    return node.value;
+    return node.value
   }
 
-  export function buildTire<T extends Record<string, any>>(root: TrieNode<T>, data: T[], key: keyof T) {
+  export function buildTire<T extends Record<string, any>>(
+    root: TrieNode<T>,
+    data: T[],
+    key: keyof T
+  ) {
     for (const item of data) {
       insert<T>(root, item[key], item)
     }
   }
 
   export function remove<T>(root: TrieNode<T>, word: string) {
-    let node = root;
-    const stack: TrieNode<T>[] = [];
+    let node = root
+    const stack: TrieNode<T>[] = []
     for (const char of word) {
       if (!node.children[char]) {
-        return;
+        return
       }
-      stack.push(node);
-      node = node.children[char];
+      stack.push(node)
+      node = node.children[char]
     }
-    node.value = null;
+    node.value = null
     while (stack.length > 0) {
-      const node = stack.pop();
-      if (node && Object.keys(node.children).length === 0 && node.value === null) {
-        const parent = stack[stack.length - 1];
+      const node = stack.pop()
+      if (
+        node &&
+        Object.keys(node.children).length === 0 &&
+        node.value === null
+      ) {
+        const parent = stack[stack.length - 1]
         if (parent) {
-          delete parent.children[word[word.length - 1]];
+          delete parent.children[word[word.length - 1]]
         }
       }
     }
@@ -60,10 +68,10 @@ export namespace Tire {
 
   export function printAll<T>(root: TrieNode<T>, prefix: string = '') {
     if (root.value) {
-      console.log(prefix, root.value);
+      console.log(prefix, root.value)
     }
     for (const key of Object.keys(root.children)) {
-      printAll(root.children[key], prefix + key);
+      printAll(root.children[key], prefix + key)
     }
   }
 }

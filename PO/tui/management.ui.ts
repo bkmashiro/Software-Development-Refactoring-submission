@@ -1,8 +1,19 @@
-import { prompt } from 'enquirer';
-import { addBook, addUser, dump, getAllBookNames, getAllUserNames, getBookByTitle, getRecordById, getUserByName, removeBook, removeUser } from '../repository';
-import { FailMessage, SuccessMessage, md5 } from '../utils';
-import chalk from 'chalk';
-const { Form, Confirm, NumberPrompt } = require('enquirer');
+import { prompt } from 'enquirer'
+import {
+  addBook,
+  addUser,
+  dump,
+  getAllBookNames,
+  getAllUserNames,
+  getBookByTitle,
+  getRecordById,
+  getUserByName,
+  removeBook,
+  removeUser,
+} from '../repository'
+import { FailMessage, SuccessMessage, md5 } from '../utils'
+import chalk from 'chalk'
+const { Form, Confirm, NumberPrompt } = require('enquirer')
 
 export async function managementIndex() {
   const promptOptions = {
@@ -19,19 +30,19 @@ export async function managementIndex() {
 
   let act = { action: '' }
   while (act.action !== 'Back') {
-    act = await prompt(promptOptions) as { action: string }
+    act = (await prompt(promptOptions)) as { action: string }
     switch (act.action) {
       case 'User Management':
         await UserManagement()
-        break;
+        break
       case 'Book Management':
         await BookManagement()
-        break;
+        break
       case 'Transaction Management':
         await TransactionManagement()
-        break;
+        break
       case 'Back':
-        break;
+        break
     }
   }
 }
@@ -52,10 +63,10 @@ async function UserManagement() {
   }
   let act = { action: '' }
   while (act.action !== 'Back') {
-    act = await prompt(promptOptions) as { action: string }
+    act = (await prompt(promptOptions)) as { action: string }
     switch (act.action) {
       case 'Add User':
-        await AddUser();
+        await AddUser()
         break
       case 'Delete User':
         await DeleteUser()
@@ -70,7 +81,7 @@ async function UserManagement() {
         await AllUser()
         break
       case 'Back':
-        break;
+        break
     }
   }
 }
@@ -82,17 +93,19 @@ export async function AddUser() {
     choices: [
       { name: 'username', message: 'username', initial: 'bakamashiro' },
       { name: 'password', message: 'password', initial: '123456' },
-    ]
-  });
+    ],
+  })
   const ans = await prompt.run()
-  if (addUser({
-    name: ans.username,
-    rawPassword: ans.password,
-  })) {
-    console.log('Add User Success');
+  if (
+    addUser({
+      name: ans.username,
+      rawPassword: ans.password,
+    })
+  ) {
+    console.log('Add User Success')
     await dump()
   } else {
-    console.log('User exists');
+    console.log('User exists')
   }
 }
 
@@ -100,10 +113,8 @@ async function DeleteUser() {
   const prompt = new Form({
     name: 'user',
     message: 'Please provide the following user information:',
-    choices: [
-      { name: 'username', message: 'username', initial: 'test' },
-    ]
-  });
+    choices: [{ name: 'username', message: 'username', initial: 'test' }],
+  })
   const ans = await prompt.run()
 
   const user = getUserByName(ans.username)
@@ -122,24 +133,21 @@ async function DeleteUser() {
 
   if (confirm) {
     if (removeUser(user.id)) {
-      console.log(`User ${ans.username} deleted`);
+      console.log(`User ${ans.username} deleted`)
       await dump()
     } else {
       FailMessage(`User ${ans.username} delete failed`)
     }
   }
-
 }
 
-const validRoles = ['admin', 'user'];
+const validRoles = ['admin', 'user']
 async function UpdateUser() {
   const prompt = new Form({
     name: 'user',
     message: 'Please provide the following user information:',
-    choices: [
-      { name: 'username', message: 'username', initial: 'test' },
-    ]
-  });
+    choices: [{ name: 'username', message: 'username', initial: 'test' }],
+  })
   const ans = await prompt.run()
 
   const user = getUserByName(ans.username)
@@ -156,8 +164,8 @@ async function UpdateUser() {
       { name: 'username', message: 'username', initial: user.name },
       { name: 'password', message: 'password', initial: '' },
       { name: 'role', message: 'role(admin, user)', initial: user.role },
-    ]
-  });
+    ],
+  })
 
   const modifyAns = await modifyPrompt.run()
 
@@ -180,10 +188,8 @@ async function QueryUser() {
   const prompt = new Form({
     name: 'user',
     message: 'Please provide the following user information:',
-    choices: [
-      { name: 'username', message: 'username', initial: 'test' },
-    ]
-  });
+    choices: [{ name: 'username', message: 'username', initial: 'test' }],
+  })
   const ans = await prompt.run()
 
   const user = getUserByName(ans.username)
@@ -215,31 +221,31 @@ async function BookManagement() {
       { name: 'Delete Book', message: 'Delete Book' },
       { name: 'Update Book', message: 'Update Book' },
       { name: 'Query Book', message: 'Query Book' },
-      { name: 'All Book', message: 'All Book'},
+      { name: 'All Book', message: 'All Book' },
       { name: 'Back', message: 'Back' },
     ],
   }
   let act = { action: '' }
   while (act.action !== 'Back') {
-    act = await prompt(promptOptions) as { action: string }
+    act = (await prompt(promptOptions)) as { action: string }
     switch (act.action) {
       case 'Add Book':
         await AddBook()
-        break;
+        break
       case 'Delete Book':
         await DeleteBook()
-        break;
+        break
       case 'Update Book':
         await UpdateBook()
-        break;
+        break
       case 'Query Book':
         await QueryBook()
-        break;
+        break
       case 'All Book':
         await AllBook()
-        break;
+        break
       case 'Back':
-        break;
+        break
     }
   }
 }
@@ -255,8 +261,8 @@ async function AddBook() {
       { name: 'publisher', message: 'publisher', initial: 'test' },
       { name: 'price', message: 'price', initial: '1' },
       { name: 'quantity', message: 'quantity', initial: '1' },
-    ]
-  });
+    ],
+  })
   const ans = await prompt.run()
   const addBookResult = addBook({
     isbn: ans.isbn,
@@ -265,7 +271,7 @@ async function AddBook() {
     publisher: ans.publisher,
     price: Number(ans.price),
     quantity: Number(ans.quantity),
-  });
+  })
   if (addBookResult) {
     SuccessMessage('Add Book Success')
     await dump()
@@ -278,10 +284,8 @@ async function DeleteBook() {
   const prompt = new Form({
     name: 'book',
     message: 'Please provide the following book information:',
-    choices: [
-      { name: 'name', message: 'book title', initial: 'test' },
-    ]
-  });
+    choices: [{ name: 'name', message: 'book title', initial: 'test' }],
+  })
   const ans = await prompt.run()
   const book = getBookByTitle(ans.name)
   if (!book) {
@@ -302,10 +306,8 @@ async function UpdateBook() {
   const prompt = new Form({
     name: 'book',
     message: 'Please provide the following book information:',
-    choices: [
-      { name: 'name', message: 'book title', initial: 'test' },
-    ]
-  });
+    choices: [{ name: 'name', message: 'book title', initial: 'test' }],
+  })
   const ans = await prompt.run()
   const book = getBookByTitle(ans.name)
   if (!book) {
@@ -323,8 +325,8 @@ async function UpdateBook() {
       { name: 'publisher', message: 'publisher', initial: book.publisher },
       { name: 'price', message: 'price', initial: book.price },
       { name: 'quantity', message: 'quantity', initial: book.quantity },
-    ]
-  });
+    ],
+  })
 
   const modifyAns = await modifyPrompt.run()
 
@@ -338,17 +340,14 @@ async function UpdateBook() {
   await dump()
 
   SuccessMessage(`Book ${book.title} updated`)
-
 }
 
 async function QueryBook() {
   const prompt = new Form({
     name: 'book',
     message: 'Please provide the following book information:',
-    choices: [
-      { name: 'name', message: 'book title', initial: 'test' },
-    ]
-  });
+    choices: [{ name: 'name', message: 'book title', initial: 'test' }],
+  })
 
   const ans = await prompt.run()
 
@@ -385,13 +384,13 @@ async function TransactionManagement() {
   let act = { action: '' }
 
   while (act.action !== 'Back') {
-    act = await prompt(promptOptions) as { action: string }
+    act = (await prompt(promptOptions)) as { action: string }
     switch (act.action) {
       case 'Query Transaction':
         await QueryTransaction()
-        break;
+        break
       case 'Back':
-        break;
+        break
     }
   }
 }
@@ -400,7 +399,7 @@ async function QueryTransaction() {
   const prompt = new NumberPrompt({
     name: 'transaction',
     message: 'Please provide the following transaction information:',
-  });
+  })
 
   const ans = await prompt.run()
 

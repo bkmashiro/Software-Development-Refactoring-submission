@@ -1,9 +1,7 @@
-import { 三月七 } from "./kolorful";
+import { march } from './kolorful'
 
-export function about(){
-  三月七.apply(null, [
-    `baka_mashiro all rights reserved`,
-  ]);
+export function about() {
+  march.apply(null, [`baka_mashiro all rights reserved`])
 
   console.log(`
   This is a program written by baka_mashiro.

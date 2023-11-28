@@ -1,25 +1,33 @@
-import { UserRole } from "./entities/user";
-import { addBook, addUser, dump, getBookByTitle, getUserByName, load, makeTransaction } from "./repository";
+import { UserRole } from './entities/user'
+import {
+  addBook,
+  addUser,
+  dump,
+  getBookByTitle,
+  getUserByName,
+  load,
+  makeTransaction,
+} from './repository'
 
-main();
+main()
 
 async function main() {
-  await load();
+  await load()
 
   addUser({
     name: 'test',
     rawPassword: 'test',
-  });
+  })
 
   addUser({
     name: 'admin',
     rawPassword: 'admin',
-  });
+  })
 
   addUser({
-    name: 'whb',
-    rawPassword: 'whb',
-  });
+    name: 'hb',
+    rawPassword: 'hb',
+  })
 
   addBook({
     title: '1984',
@@ -31,7 +39,7 @@ async function main() {
   })
 
   addBook({
-    title: 'China\'s best actor',
+    title: "China's best actor",
     isbn: '1145141919810',
     author: 'JiangHuXi',
     publisher: 'Penguin',
@@ -39,14 +47,10 @@ async function main() {
     quantity: 10,
   })
 
-  getUserByName('admin')!.role = UserRole.ADMIN;
-  getUserByName('test')!.balance = 200000;
+  getUserByName('admin')!.role = UserRole.ADMIN
+  getUserByName('test')!.balance = 200000
 
-  makeTransaction(
-    getUserByName('test')!,
-    getBookByTitle('1984')!,
-    11
-  )
-  
-  await dump();
+  makeTransaction(getUserByName('test')!, getBookByTitle('1984')!, 11)
+
+  await dump()
 }
